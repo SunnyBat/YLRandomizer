@@ -29,5 +29,7 @@ namespace YLRandomizer.Logging
         {
             Log(message, LogLevel.WARNING);
         }
+
+        public abstract void Flush();
     }
 }

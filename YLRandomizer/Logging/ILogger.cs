@@ -8,6 +8,7 @@
         void Warning(string message);
         void Error(string message);
         void Critical(string message);
+        void Flush();
     }
 
     public enum LogLevel

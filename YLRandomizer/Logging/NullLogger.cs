@@ -5,5 +5,9 @@
         public override void Log(string message, LogLevel logLevel)
         {
         }
+
+        public override void Flush()
+        {
+        }
     }
 }
