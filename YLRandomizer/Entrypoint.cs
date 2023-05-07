@@ -8,10 +8,12 @@ namespace Doorstop
 {
     public class Entrypoint
     {
+        private static bool _patched = false;
+
         public static void Start()
         {
             doSetup();
-            doPatches();
+            // TODO Add UI for connecting https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/blob/master/mod/Archipelago.cs
         }
 
         private static void doSetup()
@@ -21,39 +23,43 @@ namespace Doorstop
             info.SetValue(null, new UnityEngine.Logger(new UnityILoggerImpl(ManualSingleton<ILogger>.instance)));
             try
             {
-                var lmrt = typeof(UnityEngine.Application).GetField("s_LogCallbackHandlerThreaded", BindingFlags.NonPublic | BindingFlags.Static);
-                lmrt.SetValue(null, Delegate.CreateDelegate(typeof(UnityEngine.Application.LogCallback), typeof(Entrypoint).GetMethod("_logCallback", BindingFlags.Static | BindingFlags.NonPublic)));
-                UnityEngine.Debug.Log("TESTASDF");
+                // No idea if we need to hack this now or if we can put it in doPatchesLate but leaving it because it works 👉👉
+                var logCallbackField = typeof(UnityEngine.Application).GetField("s_LogCallbackHandlerThreaded", BindingFlags.NonPublic | BindingFlags.Static);
+                logCallbackField.SetValue(null, Delegate.CreateDelegate(typeof(UnityEngine.Application.LogCallback), typeof(Entrypoint).GetMethod("_logCallback", BindingFlags.Static | BindingFlags.NonPublic)));
             }
             catch (Exception e)
             {
                 ManualSingleton<ILogger>.instance.Info(e.Message);
                 ManualSingleton<ILogger>.instance.Info(e.StackTrace.ToString());
             }
+            // Patch late so all of the Unity native methods are hooked up
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += doPatchesLate;
+        }
+
+        private static void doPatchesLate(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode)
+        {
+            doPatches();
         }
 
         private static void doPatches()
         {
-            ManualSingleton<ILogger>.instance.Info("Patching game...");
-            try
+            if (!_patched)
             {
-                var gameObjectProperty = typeof(UnityEngine.Component).GetProperty("gameObject");
-                ManualSingleton<ILogger>.instance.Info("" + (gameObjectProperty != null));
-                var gameObjectPropetyGetFunc = gameObjectProperty.GetGetMethod();
-                ManualSingleton<ILogger>.instance.Info("" + (gameObjectPropetyGetFunc != null));
-                var mB = gameObjectPropetyGetFunc.GetMethodBody();
-                ManualSingleton<ILogger>.instance.Info("" + (mB != null));
-                var byteData = mB.GetILAsByteArray();
-                ManualSingleton<ILogger>.instance.Info("" + (byteData != null));
-                new Harmony("com.github.sunnybat.YLRandomizer").PatchAll(Assembly.GetExecutingAssembly());
-                ReplaceMethodInstructions(typeof(UnityEngine.Component).GetProperty("gameObject").GetGetMethod(), byteData);
+                ManualSingleton<ILogger>.instance.Info("Patching game...");
+                try
+                {
+                    new Harmony("com.github.sunnybat.YLRandomizer").PatchAll(Assembly.GetExecutingAssembly());
+                    ManualSingleton<ILogger>.instance.Info("Finished patching game.");
+                    _patched = true;
+                    UnityEngine.SceneManagement.SceneManager.sceneLoaded -= doPatchesLate;
+                }
+                catch (Exception e)
+                {
+                    ManualSingleton<ILogger>.instance.Info(e.Message);
+                    ManualSingleton<ILogger>.instance.Info(e.StackTrace.ToString());
+                    ManualSingleton<ILogger>.instance.Info("Error patching game. Future patches will be retried, but could break.");
+                }
             }
-            catch (Exception e)
-            {
-                ManualSingleton<ILogger>.instance.Info(e.Message);
-                ManualSingleton<ILogger>.instance.Info(e.StackTrace.ToString());
-            }
-            ManualSingleton<ILogger>.instance.Info("Finished patching game.");
         }
 
         private static void _logCallback(string condition, string stackTrace, UnityEngine.LogType type)
@@ -62,7 +68,6 @@ namespace Doorstop
             {
                 if (ManualSingleton<ILogger>.instance != null)
                 {
-                    ManualSingleton<ILogger>.instance.Info("CALLED");
                     if (!string.IsNullOrEmpty(condition))
                     {
                         ManualSingleton<ILogger>.instance.Info(condition);
