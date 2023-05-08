@@ -16,7 +16,7 @@
             // 5 = Glitterglaze Glacier
             // 6 = Moodymaze Marsh
             // 7 = Nothing
-            var pagieAddition = (worldIndex - 1) * 30;
+            var pagieAddition = (worldIndex - 1) * PAGIES_PER_WORLD;
             return LOCATION_ID_BASE + pagieAddition + pagieIndex;
         }
 

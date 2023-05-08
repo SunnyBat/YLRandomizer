@@ -18,6 +18,7 @@ namespace YLRandomizer.Scripts
         {
             if (ManualSingleton<IRandomizer>.instance == null)
             {
+                _drawShadedRectangle(new Rect(10, 30, 320, 86));
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 // Yoinked directly from Subnautica randomizer, thanks Berserker
@@ -39,12 +40,13 @@ namespace YLRandomizer.Scripts
                     ManualSingleton<IRandomizer>.instance = new ArchipelagoRandomizer(_hostName, _username, _password); // Trigger connection, setup will be after this
                     ArchipelagoDataHandler.HookUpEventSubscribers();
                 }
-                _printMessages(115);
+                _printMessages(122);
             }
             else
             {
+                _drawShadedRectangle(new Rect(10, 30, 320, 26));
                 GUI.Label(new Rect(16, 36, 900, 20), "Archipelago configured.");
-                _printMessages(56);
+                _printMessages(62);
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
             }
@@ -53,10 +55,19 @@ namespace YLRandomizer.Scripts
         private void _printMessages(long yStart)
         {
             var allMessages = ManualSingleton<IUserMessages>.instance.GetMessages();
+            _drawShadedRectangle(new Rect(10, yStart - 6, 320, (20 * allMessages.Length) + 6));
             for (int i = 0; i < allMessages.Length; i++)
             {
                 GUI.Label(new Rect(16, yStart + (20 * i), 900, 20), allMessages[i]);
             }
+        }
+
+        private void _drawShadedRectangle(Rect rect)
+        {
+            Color startingColor = GUI.color;
+            GUI.color = new Color(0f, 0f, 0f, 0.5f);
+            GUI.DrawTexture(rect, Texture2D.whiteTexture);
+            GUI.color = startingColor;
         }
     }
 }
