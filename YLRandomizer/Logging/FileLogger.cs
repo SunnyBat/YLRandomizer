@@ -5,30 +5,54 @@ namespace YLRandomizer.Logging
 {
     public class FileLogger : DirectedLogger
     {
-        FileStream outputStream;
-        public FileLogger(string path)
+        FileStream logOutputStream;
+        FileStream errorOutputStream;
+        public FileLogger(string errorPath, string logPath = null)
         {
-            File.Delete(path);
-            outputStream = File.OpenWrite(path);
+            File.Delete(errorPath);
+            errorOutputStream = File.OpenWrite(errorPath);
+            if (!string.IsNullOrEmpty(logPath))
+            {
+                File.Delete(logPath);
+                logOutputStream = File.OpenWrite(logPath);
+            }
         }
 
         public override void Log(string message, LogLevel logLevel)
         {
-            if (outputStream != null)
+            switch (logLevel)
             {
-                try
-                {
-                    var toWrite = Encoding.UTF8.GetBytes(message + "\r\n");
-                    outputStream.Write(toWrite, 0, toWrite.Length);
-                    Flush();
-                }
-                catch { }
+                case LogLevel.CRITICAL:
+                case LogLevel.ERROR:
+                case LogLevel.WARNING:
+                    if (errorOutputStream != null)
+                    {
+                        try
+                        {
+                            var toWrite = Encoding.UTF8.GetBytes(logLevel + ": " + message + "\r\n");
+                            errorOutputStream.Write(toWrite, 0, toWrite.Length);
+                        }
+                        catch { }
+                    }
+                    break;
+                default:
+                    if (logOutputStream != null)
+                    {
+                        try
+                        {
+                            var toWrite = Encoding.UTF8.GetBytes(logLevel + ": " + message + "\r\n");
+                            logOutputStream.Write(toWrite, 0, toWrite.Length);
+                        }
+                        catch { }
+                    }
+                    break;
             }
         }
 
         public override void Flush()
         {
-            outputStream.Flush();
+            logOutputStream?.Flush();
+            errorOutputStream?.Flush();
         }
     }
 }

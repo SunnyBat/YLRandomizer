@@ -20,7 +20,6 @@ namespace YLRandomizer.Scripts
 
         private void _tick()
         {
-            ManualSingleton<YLRandomizer.Logging.ILogger>.instance?.Info("Heartbeat: " + (ManualSingleton<IRandomizer>.instance != null));
             ManualSingleton<IRandomizer>.instance?.Tick();
         }
     }

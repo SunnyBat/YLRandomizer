@@ -18,7 +18,7 @@ namespace Doorstop
 
         private static void doSetup()
         {
-            ManualSingleton<ILogger>.instance = new FileLogger("YLRandomizer.log");
+            ManualSingleton<ILogger>.instance = new FileLogger("YLRandomizer.err", "YLRandomizer.log");
             var info = typeof(UnityEngine.Debug).GetField("s_Logger", BindingFlags.NonPublic | BindingFlags.Static);
             info.SetValue(null, new UnityEngine.Logger(new UnityILoggerImpl(ManualSingleton<ILogger>.instance)));
             try
