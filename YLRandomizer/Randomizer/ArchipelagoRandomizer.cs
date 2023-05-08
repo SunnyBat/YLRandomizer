@@ -149,7 +149,10 @@ namespace YLRandomizer.Randomizer
                                         _messageReceivedQueue.Enqueue("ERROR: Failed to connect to Archipelago server for the following reasons:");
                                         failedRes.Errors.Do(err => _messageReceivedQueue.Enqueue("- " + err));
                                     }
-                                    Thread.Sleep(TIME_BETWEEN_AP_CONNECTION_ATTEMPTS);
+                                    if (_sequentialConnectionAttempts < MAX_CONNECTION_ATTEMPTS)
+                                    {
+                                        Thread.Sleep(TIME_BETWEEN_AP_CONNECTION_ATTEMPTS);
+                                    }
                                 }
                             }
                             catch (Exception e)
@@ -158,7 +161,10 @@ namespace YLRandomizer.Randomizer
                                 {
                                     _messageReceivedQueue.Enqueue("ERROR: Couldn't connect and log in: " + e.Message);
                                 }
-                                Thread.Sleep(TIME_BETWEEN_AP_CONNECTION_ATTEMPTS);
+                                if (_sequentialConnectionAttempts < MAX_CONNECTION_ATTEMPTS)
+                                {
+                                    Thread.Sleep(TIME_BETWEEN_AP_CONNECTION_ATTEMPTS);
+                                }
                             }
                         }
                     }

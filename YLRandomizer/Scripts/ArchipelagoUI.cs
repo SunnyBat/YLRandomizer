@@ -56,7 +56,7 @@ namespace YLRandomizer.Scripts
             else
             {
                 // TODO Allow duplicate messages in dictionary
-                GUI.Label(new Rect(16, 36, 150, 20), "Archipelago configured.");
+                GUI.Label(new Rect(16, 36, 900, 20), "Archipelago configured.");
                 int labelCount = 1;
                 var messageInfo = messages.Keys.ToArray();
                 for (int i = 0; i < messageInfo.Length; i++)
@@ -68,7 +68,7 @@ namespace YLRandomizer.Scripts
                     }
                     else
                     {
-                        GUI.Label(new Rect(16, 36 * ++labelCount, 150, 20), currentMessage);
+                        GUI.Label(new Rect(16, 36 + (20 * labelCount++), 900, 20), currentMessage);
                     }
                 }
                 Cursor.lockState = CursorLockMode.Locked;

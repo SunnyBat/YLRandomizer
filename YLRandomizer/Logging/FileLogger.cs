@@ -8,6 +8,7 @@ namespace YLRandomizer.Logging
         FileStream outputStream;
         public FileLogger(string path)
         {
+            File.Delete(path);
             outputStream = File.OpenWrite(path);
         }
 
