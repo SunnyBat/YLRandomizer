@@ -63,7 +63,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\ArchipelagoDataHandler.cs" />
     <Compile Include="Data\ArchipelagoLocationConverter.cs" />
+    <Compile Include="Data\IUserMessages.cs" />
+    <Compile Include="Data\UserMessages.cs" />
     <Compile Include="Entrypoint.cs" />
     <Compile Include="Logging\BlendedLogger.cs" />
     <Compile Include="Logging\DirectedLogger.cs" />

@@ -4,6 +4,7 @@ using YLRandomizer.Logging;
 using YLRandomizer;
 using System;
 using YLRandomizer.Scripts;
+using YLRandomizer.Data;
 
 namespace Doorstop
 {
@@ -18,6 +19,7 @@ namespace Doorstop
 
         private static void doSetup()
         {
+            ManualSingleton<IUserMessages>.instance = new UserMessages();
             ManualSingleton<ILogger>.instance = new FileLogger("YLRandomizer.err", "YLRandomizer.log");
             var info = typeof(UnityEngine.Debug).GetField("s_Logger", BindingFlags.NonPublic | BindingFlags.Static);
             info.SetValue(null, new UnityEngine.Logger(new UnityILoggerImpl(ManualSingleton<ILogger>.instance)));
@@ -29,8 +31,8 @@ namespace Doorstop
             }
             catch (Exception e)
             {
-                ManualSingleton<ILogger>.instance.Info(e.Message);
-                ManualSingleton<ILogger>.instance.Info(e.StackTrace);
+                ManualSingleton<ILogger>.instance.Error(e.Message);
+                ManualSingleton<ILogger>.instance.Error(e.StackTrace);
             }
             // Patch late so all of the Unity native methods are hooked up
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += unitySceneFirstLoad;
@@ -57,9 +59,9 @@ namespace Doorstop
                 }
                 catch (Exception e)
                 {
-                    ManualSingleton<ILogger>.instance.Info(e.Message);
-                    ManualSingleton<ILogger>.instance.Info(e.StackTrace);
-                    ManualSingleton<ILogger>.instance.Info("Error patching game. Future patches will be retried, but could break.");
+                    ManualSingleton<ILogger>.instance.Error(e.Message);
+                    ManualSingleton<ILogger>.instance.Error(e.StackTrace);
+                    ManualSingleton<ILogger>.instance.Error("Error patching game. Future patches will be retried, but could break.");
                 }
             }
         }
@@ -92,24 +94,6 @@ namespace Doorstop
             catch (Exception ex)
             {
             }
-        }
-
-        public static void ReplaceMethodInstructions(MethodInfo originalMethod, byte[] newInstructions)
-        {
-            ManualSingleton<ILogger>.instance.Info("" + (originalMethod != null));
-            // Retrieve the method body of the original method
-            MethodBody originalBody = originalMethod.GetMethodBody();
-            ManualSingleton<ILogger>.instance.Info("" + (originalBody != null));
-
-            // Retrieve the byte array that represents the IL instructions of the new method
-            ManualSingleton<ILogger>.instance.Info("" + (newInstructions != null));
-
-            // Use reflection to obtain a reference to the private field that stores the IL instructions of the original method
-            FieldInfo methodBodyILField = typeof(MethodBody).GetField("m_IL", BindingFlags.NonPublic | BindingFlags.Instance);
-            ManualSingleton<ILogger>.instance.Info("" + (methodBodyILField != null));
-
-            // Overwrite the IL instructions of the original method with the IL instructions of the new method
-            methodBodyILField.SetValue(originalBody, newInstructions);
         }
     }
 }

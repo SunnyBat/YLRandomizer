@@ -97,7 +97,11 @@ namespace YLRandomizer.Randomizer
                             catch (Exception e)
                             {
                             }
-                            ManualSingleton<IRandomizer>.instance = null;
+                            // Session will hang around accumulating locations if left un-reconnected, but
+                            // it doesn't /really/ matter since we re-send all locations on reconnection
+                            // anyways.
+                            // Letting it hang around also gives us a chance to flush out any last-minute
+                            // messages (eg failed to connect messages)
                             return; // Kill thread
                         }
                         else if (connected)

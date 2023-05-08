@@ -12,7 +12,7 @@ namespace YLRandomizer.Patches
         [HarmonyPostfix]
         public static void Postfix()
         {
-            ManualSingleton<ILogger>.instance.Info($"SavegameMamager_Validate.Postfix()");
+            ManualSingleton<ILogger>.instance.Debug($"SavegameMamager_Validate.Postfix()");
             // This will be called after a world is loaded.
 
             // === HANDLE EXISTING LOCATIONS ===
@@ -104,7 +104,7 @@ namespace YLRandomizer.Patches
         [HarmonyPostfix]
         public static void Postfix(int index, Savegame.CollectionStatus status)
         {
-            ManualSingleton<ILogger>.instance.Info($"SavegameManager_CollectPagie.Postfix()");
+            ManualSingleton<ILogger>.instance.Debug($"SavegameManager_CollectPagie.Postfix(): {index}, {status}");
             SavegameManager.instance.savegame.player.unspentPagies--;
             ManualSingleton<IRandomizer>.instance?.LocationChecked(ArchipelagoLocationConverter.GetLocationId(DestroyableMonoBehaviourSingleton<WorldInfo>.instance.worldIndex, index));
         }

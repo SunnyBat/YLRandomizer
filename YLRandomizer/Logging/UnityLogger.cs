@@ -1,7 +1,4 @@
-﻿using System.IO;
-using System.Text;
-
-namespace YLRandomizer.Logging
+﻿namespace YLRandomizer.Logging
 {
     public class UnityLogger : DirectedLogger
     {
