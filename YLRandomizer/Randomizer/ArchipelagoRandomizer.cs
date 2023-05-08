@@ -94,9 +94,7 @@ namespace YLRandomizer.Randomizer
                                     _session.Socket.Disconnect();
                                 }
                             }
-                            catch (Exception e)
-                            {
-                            }
+                            catch { }
                             // Session will hang around accumulating locations if left un-reconnected, but
                             // it doesn't /really/ matter since we re-send all locations on reconnection
                             // anyways.

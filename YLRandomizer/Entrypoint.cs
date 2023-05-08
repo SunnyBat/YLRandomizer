@@ -91,9 +91,7 @@ namespace Doorstop
                     ManualSingleton<ILogger>.instance.Flush();
                 }
             }
-            catch (Exception ex)
-            {
-            }
+            catch { }
         }
     }
 }
