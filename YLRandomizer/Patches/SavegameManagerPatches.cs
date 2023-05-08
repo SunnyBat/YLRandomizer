@@ -106,7 +106,7 @@ namespace YLRandomizer.Patches
         {
             ManualSingleton<ILogger>.instance.Info($"SavegameManager_CollectPagie.Postfix()");
             SavegameManager.instance.savegame.player.unspentPagies--;
-            ManualSingleton<IRandomizer>.instance.LocationChecked(ArchipelagoLocationConverter.GetLocationId(DestroyableMonoBehaviourSingleton<WorldInfo>.instance.worldIndex, index));
+            ManualSingleton<IRandomizer>.instance?.LocationChecked(ArchipelagoLocationConverter.GetLocationId(DestroyableMonoBehaviourSingleton<WorldInfo>.instance.worldIndex, index));
         }
     }
 }

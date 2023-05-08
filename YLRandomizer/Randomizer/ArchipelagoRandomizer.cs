@@ -82,6 +82,7 @@ namespace YLRandomizer.Randomizer
                         catch (Exception e)
                         {
                         }
+                        ManualSingleton<IRandomizer>.instance = null;
                         return; // Kill thread
                     }
                     else if (_session.Socket.Connected)
