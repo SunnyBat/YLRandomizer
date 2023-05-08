@@ -14,9 +14,10 @@ namespace YLRandomizer.Scripts
             // Relevant class: FrontendSavegameScreenController -- OnSubmit() will call LoadSlot(), which loads the savegame of interest
             if (ManualSingleton<IRandomizer>.instance == null)
             {
-                // Yoinked from Subnautica, thanks Berserker
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+                // Yoinked directly from Subnautica, thanks Berserker
                 // https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/blob/master/mod/Archipelago.cs
-                // TODO Make this actually focusable :(
                 GUI.Label(new Rect(16, 36, 150, 20), "Host: ");
                 GUI.Label(new Rect(16, 56, 150, 20), "PlayerName: ");
                 GUI.Label(new Rect(16, 76, 150, 20), "Password: ");
@@ -37,6 +38,8 @@ namespace YLRandomizer.Scripts
             else
             {
                 GUI.Label(new Rect(16, 36, 150, 20), "Archipelago configured.");
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
             }
         }
     }
