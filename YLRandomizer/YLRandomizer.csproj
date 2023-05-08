@@ -63,6 +63,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\ArchipelagoLocationConverter.cs" />
     <Compile Include="Entrypoint.cs" />
     <Compile Include="Logging\BlendedLogger.cs" />
     <Compile Include="Logging\DirectedLogger.cs" />
@@ -74,6 +75,9 @@
     <Compile Include="ManualSingleton.cs" />
     <Compile Include="Patches\SavegameManagerPatches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Randomizer\ArchipelagoRandomizer.cs" />
+    <Compile Include="Randomizer\IRandomizer.cs" />
+    <Compile Include="Scripts\ArchipelagoUI.cs" />
     <Compile Include="Scripts\ExceptionHandler.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -3,6 +3,7 @@ using System.Reflection;
 using YLRandomizer.Logging;
 using YLRandomizer;
 using System;
+using YLRandomizer.Scripts;
 
 namespace Doorstop
 {
@@ -13,7 +14,6 @@ namespace Doorstop
         public static void Start()
         {
             doSetup();
-            // TODO Add UI for connecting https://github.com/Berserker66/ArchipelagoSubnauticaModSrc/blob/master/mod/Archipelago.cs
         }
 
         private static void doSetup()
@@ -33,12 +33,13 @@ namespace Doorstop
                 ManualSingleton<ILogger>.instance.Info(e.StackTrace.ToString());
             }
             // Patch late so all of the Unity native methods are hooked up
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded += doPatchesLate;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += unitySceneFirstLoad;
         }
 
-        private static void doPatchesLate(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode)
+        private static void unitySceneFirstLoad(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode)
         {
             doPatches();
+            configureGUI();
         }
 
         private static void doPatches()
@@ -51,7 +52,7 @@ namespace Doorstop
                     new Harmony("com.github.sunnybat.YLRandomizer").PatchAll(Assembly.GetExecutingAssembly());
                     ManualSingleton<ILogger>.instance.Info("Finished patching game.");
                     _patched = true;
-                    UnityEngine.SceneManagement.SceneManager.sceneLoaded -= doPatchesLate;
+                    UnityEngine.SceneManagement.SceneManager.sceneLoaded -= unitySceneFirstLoad;
                 }
                 catch (Exception e)
                 {
@@ -60,6 +61,14 @@ namespace Doorstop
                     ManualSingleton<ILogger>.instance.Info("Error patching game. Future patches will be retried, but could break.");
                 }
             }
+        }
+
+        private static void configureGUI()
+        {
+            // Create a game object that will be responsible to drawing the IMGUI in the Menu.
+            var guiGameobject = new UnityEngine.GameObject();
+            guiGameobject.AddComponent<ArchipelagoUI>();
+            UnityEngine.GameObject.DontDestroyOnLoad(guiGameobject);
         }
 
         private static void _logCallback(string condition, string stackTrace, UnityEngine.LogType type)
