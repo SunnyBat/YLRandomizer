@@ -1,13 +1,18 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 using YLRandomizer.Randomizer;
 
 namespace YLRandomizer.Scripts
 {
     public class ArchipelagoUI : MonoBehaviour
     {
-        string _hostName = string.Empty;
-        string _username = string.Empty;
-        string _password = string.Empty;
+        private static readonly TimeSpan MESSAGE_DISPLAY_TIME = TimeSpan.FromSeconds(10);
+        private Dictionary<string, DateTime> messages = new Dictionary<string, DateTime>();
+        private string _hostName = string.Empty;
+        private string _username = string.Empty;
+        private string _password = string.Empty;
 
         void OnGUI()
         {
@@ -33,11 +38,39 @@ namespace YLRandomizer.Scripts
                 if ((GUI.Button(new Rect(16, 96, 100, 20), "Connect") || submit) && !string.IsNullOrEmpty(_hostName) && !string.IsNullOrEmpty(_username))
                 {
                     ManualSingleton<IRandomizer>.instance = new ArchipelagoRandomizer(_hostName, _username, _password);
+                    ManualSingleton<IRandomizer>.instance.MessageReceived += (message) =>
+                    {
+                        ManualSingleton<YLRandomizer.Logging.ILogger>.instance.Info(message);
+                        messages[message] = DateTime.Now;
+                    };
+                    ManualSingleton<IRandomizer>.instance.ItemReceived += (itemId) =>
+                    {
+                        ManualSingleton<YLRandomizer.Logging.ILogger>.instance.Info("Pagie received: " + itemId);
+                    };
+                    ManualSingleton<IRandomizer>.instance.LocationReceived += (locationId) =>
+                    {
+                        ManualSingleton<YLRandomizer.Logging.ILogger>.instance.Info("Location marked as checked: " + locationId);
+                    };
                 }
             }
             else
             {
+                // TODO Allow duplicate messages in dictionary
                 GUI.Label(new Rect(16, 36, 150, 20), "Archipelago configured.");
+                int labelCount = 1;
+                var messageInfo = messages.Keys.ToArray();
+                for (int i = 0; i < messageInfo.Length; i++)
+                {
+                    var currentMessage = messageInfo[i];
+                    if (DateTime.Now - messages[currentMessage] > MESSAGE_DISPLAY_TIME)
+                    {
+                        messages.Remove(messageInfo[i]);
+                    }
+                    else
+                    {
+                        GUI.Label(new Rect(16, 36 * ++labelCount, 150, 20), currentMessage);
+                    }
+                }
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
             }

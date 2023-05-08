@@ -28,6 +28,7 @@ namespace YLRandomizer.Randomizer
 
         private bool _killed = false;
         private readonly object _threadLock = new object();
+        private readonly object _sessionLock = new object();
         private int _sequentialConnectionAttempts = 0;
         private ArchipelagoSession _session;
         private readonly Queue<NetworkItem> _itemReceivedQueue = new Queue<NetworkItem>();
@@ -42,149 +43,169 @@ namespace YLRandomizer.Randomizer
         /// <param name="address">The address to use. May contain a protocol and/or port.</param>
         public ArchipelagoRandomizer(string address, string username, string password)
         {
-            _session = ArchipelagoSessionFactory.CreateSession(address);
-            _session.Items.ItemReceived += (itemHelper) =>
+            lock (_sessionLock)
             {
-                lock (_threadLock)
+                _session = ArchipelagoSessionFactory.CreateSession(address);
+                _session.Items.ItemReceived += (itemHelper) =>
                 {
-                    _itemReceivedQueue.Enqueue(itemHelper.DequeueItem());
-                }
-            };
-            _session.Locations.CheckedLocationsUpdated += (locHelper) =>
-            {
-                lock (_threadLock)
+                    lock (_threadLock)
+                    {
+                        _itemReceivedQueue.Enqueue(itemHelper.DequeueItem());
+                    }
+                };
+                _session.Locations.CheckedLocationsUpdated += (locHelper) =>
                 {
-                    locHelper.Do(locId => _locationReceivedQueue.Enqueue(locId));
-                }
-            };
-            _session.MessageLog.OnMessageReceived += (message) =>
-            {
-                lock (_threadLock)
+                    lock (_threadLock)
+                    {
+                        locHelper.Do(locId => _locationReceivedQueue.Enqueue(locId));
+                    }
+                };
+                _session.MessageLog.OnMessageReceived += (message) =>
                 {
-                    _messageReceivedQueue.Enqueue(message.ToString());
-                }
-            };
+                    lock (_threadLock)
+                    {
+                        _messageReceivedQueue.Enqueue(message.ToString());
+                    }
+                };
+            }
             new Thread(() =>
             {
                 while (true)
                 {
-                    bool killed;
-                    lock (_threadLock)
+                    try
                     {
-                        killed = _killed;
-                    }
-                    if (killed)
-                    {
-                        try
+                        bool killed;
+                        bool connected;
+                        lock (_threadLock)
                         {
-                            _session.Socket.Disconnect();
+                            killed = _killed;
                         }
-                        catch (Exception e)
+                        lock (_sessionLock)
                         {
+                            connected = _session.Socket.Connected;
                         }
-                        ManualSingleton<IRandomizer>.instance = null;
-                        return; // Kill thread
-                    }
-                    else if (_session.Socket.Connected)
-                    {
-                        DateTime startTime = DateTime.Now;
-                        _apTick(); // Thread-safe
-                        var timeToSleep = TIME_BETWEEN_AP_PROCESSES - (DateTime.Now - startTime);
-                        if (timeToSleep > TimeSpan.Zero)
+                        if (killed)
                         {
-                            Thread.Sleep(timeToSleep);
-                        }
-                    }
-                    else
-                    {
-                        try
-                        {
-                            lock (_threadLock)
+                            try
                             {
-                                if (_sequentialConnectionAttempts < MAX_CONNECTION_ATTEMPTS)
+                                _apTick(); // One last process, if it fails we've already disconnected anyways
+                                lock (_sessionLock)
                                 {
-                                    _sequentialConnectionAttempts++;
-                                    _messageReceivedQueue.Enqueue("Attempting to connect to Archipelago...");
+                                    _session.Socket.Disconnect();
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                            }
+                            ManualSingleton<IRandomizer>.instance = null;
+                            return; // Kill thread
+                        }
+                        else if (connected)
+                        {
+                            DateTime startTime = DateTime.Now;
+                            _apTick(); // Thread-safe
+                            var timeToSleep = TIME_BETWEEN_AP_PROCESSES - (DateTime.Now - startTime);
+                            if (timeToSleep > TimeSpan.Zero)
+                            {
+                                Thread.Sleep(timeToSleep);
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                lock (_threadLock)
+                                {
+                                    if (_sequentialConnectionAttempts < MAX_CONNECTION_ATTEMPTS)
+                                    {
+                                        _sequentialConnectionAttempts++;
+                                        _messageReceivedQueue.Enqueue("Attempting to connect to Archipelago...");
+                                    }
+                                    else
+                                    {
+                                        _messageReceivedQueue.Enqueue("FATAL: Max connection attempts reached.");
+                                        _killed = true;
+                                        continue;
+                                    }
+                                }
+                                LoginResult result;
+                                lock (_sessionLock)
+                                {
+                                    result = _session.TryConnectAndLogin("YookaLaylee", username, Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, new Version(1, 0, 0), password: password);
+                                }
+                                if (result.Successful)
+                                {
+                                    lock (_threadLock)
+                                    {
+                                        _sequentialConnectionAttempts = 0;
+                                        _messageReceivedQueue.Enqueue("Connected to Archipelago server!");
+                                    }
                                 }
                                 else
                                 {
-                                    _messageReceivedQueue.Enqueue("FATAL: Max connection attempts reached.");
-                                    _killed = true;
-                                    continue;
+                                    var failedRes = result as LoginFailure;
+                                    lock (_threadLock)
+                                    {
+                                        _messageReceivedQueue.Enqueue("ERROR: Failed to connect to Archipelago server for the following reasons:");
+                                        failedRes.Errors.Do(err => _messageReceivedQueue.Enqueue("- " + err));
+                                    }
+                                    Thread.Sleep(TIME_BETWEEN_AP_CONNECTION_ATTEMPTS);
                                 }
                             }
-                            var result = _session.TryConnectAndLogin("YookaLaylee", username, Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, new Version(1, 0, 0), password: password);
-                            if (result.Successful)
+                            catch (Exception e)
                             {
                                 lock (_threadLock)
                                 {
-                                    _sequentialConnectionAttempts = 0;
-                                    _messageReceivedQueue.Enqueue("Connected to Archipelago server!");
-                                }
-                            }
-                            else
-                            {
-                                var failedRes = result as LoginFailure;
-                                lock (_threadLock)
-                                {
-                                    _messageReceivedQueue.Enqueue("ERROR: Failed to connect to Archipelago server for the following reasons:");
-                                    failedRes.Errors.Do(err => _messageReceivedQueue.Enqueue("- " + err));
+                                    _messageReceivedQueue.Enqueue("ERROR: Couldn't connect and log in: " + e.Message);
                                 }
                                 Thread.Sleep(TIME_BETWEEN_AP_CONNECTION_ATTEMPTS);
                             }
                         }
-                        catch (Exception e)
-                        {
-                            lock (_threadLock)
-                            {
-                                _messageReceivedQueue.Enqueue("ERROR: Couldn't connect and log in: " + e.Message);
-                            }
-                            Thread.Sleep(TIME_BETWEEN_AP_CONNECTION_ATTEMPTS);
-                        }
+                    }
+                    catch (Exception e)
+                    {
+                        ManualSingleton<YLRandomizer.Logging.ILogger>.instance?.Error(e.Message);
+                        ManualSingleton<YLRandomizer.Logging.ILogger>.instance?.Error(e.StackTrace);
                     }
                 }
-            });
+            }).Start();
         }
 
         public long[] GetAllItems()
         {
-            bool connected;
-            lock (_threadLock) // Don't trust Socket.Connected, so lock just in case
+            lock (_sessionLock)
             {
-                connected = _session.Socket.Connected;
-            }
-            if (connected)
-            {
-                // Don't need to lock on this specifically because:
-                // - _session is never changed
-                // - Items is never changed
-                // - AllItemsReceived is thread-safe
-                return _session.Items.AllItemsReceived.Select(itm => itm.Item).Distinct().ToArray();
-            }
-            else
-            {
-                return new long[0];
+                if (_session.Socket.Connected)
+                {
+                    // Don't need to lock on this specifically because:
+                    // - _session is never changed
+                    // - Items is never changed
+                    // - AllItemsReceived is thread-safe
+                    return _session.Items.AllItemsReceived.Select(itm => itm.Item).Distinct().ToArray();
+                }
+                else
+                {
+                    return new long[0];
+                }
             }
         }
 
         public long[] GetAllCheckedLocations()
         {
-            bool connected;
-            lock (_threadLock) // Don't trust Socket.Connected, so lock just in case
+            lock (_sessionLock)
             {
-                connected = _session.Socket.Connected;
-            }
-            if (connected)
-            {
-                // Don't need to lock on this specifically because:
-                // - _session is never changed
-                // - Locations is never changed
-                // - AllLocationsChecked is thread-safe
-                return _session.Locations.AllLocationsChecked.ToArray();
-            }
-            else
-            {
-                return new long[0];
+                if (_session.Socket.Connected)
+                {
+                    // Don't need to lock on this specifically because:
+                    // - _session is never changed
+                    // - Locations is never changed
+                    // - AllLocationsChecked is thread-safe
+                    return _session.Locations.AllLocationsChecked.ToArray();
+                }
+                else
+                {
+                    return new long[0];
+                }
             }
         }
 
@@ -225,7 +246,7 @@ namespace YLRandomizer.Randomizer
                         _messageReceivedQueue.Enqueue($"ERROR: Exception while processing location unlock {id}: {e.Message}");
                     }
                     ManualSingleton<ILogger>.instance.Error($"Exception while processing location unlock {id}: {e.Message}");
-                    ManualSingleton<ILogger>.instance.Error(e.StackTrace.Join());
+                    ManualSingleton<ILogger>.instance.Error(e.StackTrace);
                 }
             });
 
@@ -248,7 +269,7 @@ namespace YLRandomizer.Randomizer
                         _messageReceivedQueue.Enqueue($"ERROR: Exception while processing item unlock ({item.Item}, {item.Location}, {item.Player}): {e.Message}");
                     }
                     ManualSingleton<ILogger>.instance.Error($"Exception while processing item unlock ({item.Item}, {item.Location}, {item.Player}): {e.Message}");
-                    ManualSingleton<ILogger>.instance.Error(e.StackTrace.Join());
+                    ManualSingleton<ILogger>.instance.Error(e.StackTrace);
                 }
             });
 
@@ -268,7 +289,7 @@ namespace YLRandomizer.Randomizer
                 catch (Exception e)
                 {
                     ManualSingleton<ILogger>.instance.Error($"Exception while processing message \"{message}\": {e.Message}");
-                    ManualSingleton<ILogger>.instance.Error(e.StackTrace.Join());
+                    ManualSingleton<ILogger>.instance.Error(e.StackTrace);
                 }
             });
         }
@@ -291,7 +312,10 @@ namespace YLRandomizer.Randomizer
             }
             if (locationsToSend.Length > 0)
             {
-                _session.Locations.CompleteLocationChecks(locationsToSend);
+                lock (_sessionLock)
+                {
+                    _session.Locations.CompleteLocationChecks(locationsToSend);
+                }
             }
         }
     }

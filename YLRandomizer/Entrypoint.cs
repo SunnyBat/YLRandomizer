@@ -30,7 +30,7 @@ namespace Doorstop
             catch (Exception e)
             {
                 ManualSingleton<ILogger>.instance.Info(e.Message);
-                ManualSingleton<ILogger>.instance.Info(e.StackTrace.ToString());
+                ManualSingleton<ILogger>.instance.Info(e.StackTrace);
             }
             // Patch late so all of the Unity native methods are hooked up
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += unitySceneFirstLoad;
@@ -40,6 +40,7 @@ namespace Doorstop
         {
             doPatches();
             configureGUI();
+            ArchipelagoHeartbeat.CreateNewHeartbeat();
         }
 
         private static void doPatches()
@@ -57,7 +58,7 @@ namespace Doorstop
                 catch (Exception e)
                 {
                     ManualSingleton<ILogger>.instance.Info(e.Message);
-                    ManualSingleton<ILogger>.instance.Info(e.StackTrace.ToString());
+                    ManualSingleton<ILogger>.instance.Info(e.StackTrace);
                     ManualSingleton<ILogger>.instance.Info("Error patching game. Future patches will be retried, but could break.");
                 }
             }
