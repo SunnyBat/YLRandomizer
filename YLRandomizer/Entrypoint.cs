@@ -21,19 +21,6 @@ namespace Doorstop
         {
             ManualSingleton<IUserMessages>.instance = new UserMessages();
             ManualSingleton<ILogger>.instance = new FileLogger("YLRandomizer.err", "YLRandomizer.log");
-            var info = typeof(UnityEngine.Debug).GetField("s_Logger", BindingFlags.NonPublic | BindingFlags.Static);
-            info.SetValue(null, new UnityEngine.Logger(new UnityILoggerImpl(ManualSingleton<ILogger>.instance)));
-            try
-            {
-                // No idea if we need to hack this now or if we can put it in doPatchesLate but leaving it because it works 👉👉
-                var logCallbackField = typeof(UnityEngine.Application).GetField("s_LogCallbackHandlerThreaded", BindingFlags.NonPublic | BindingFlags.Static);
-                logCallbackField.SetValue(null, Delegate.CreateDelegate(typeof(UnityEngine.Application.LogCallback), typeof(Entrypoint).GetMethod("_logCallback", BindingFlags.Static | BindingFlags.NonPublic)));
-            }
-            catch (Exception e)
-            {
-                ManualSingleton<ILogger>.instance.Error(e.Message);
-                ManualSingleton<ILogger>.instance.Error(e.StackTrace);
-            }
             // Patch late so all of the Unity native methods are hooked up
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += unitySceneFirstLoad;
         }
@@ -42,6 +29,7 @@ namespace Doorstop
         {
             doPatches();
             configureGUI();
+            loadUnityExplorer();
             ArchipelagoHeartbeat.CreateNewHeartbeat();
         }
 
@@ -74,24 +62,23 @@ namespace Doorstop
             UnityEngine.GameObject.DontDestroyOnLoad(guiGameobject);
         }
 
-        private static void _logCallback(string condition, string stackTrace, UnityEngine.LogType type)
+        private static void loadUnityExplorer()
         {
+            // Unity Explorer
             try
             {
-                if (ManualSingleton<ILogger>.instance != null)
-                {
-                    if (!string.IsNullOrEmpty(condition))
-                    {
-                        ManualSingleton<ILogger>.instance.Info(condition);
-                    }
-                    if (!string.IsNullOrEmpty(stackTrace))
-                    {
-                        ManualSingleton<ILogger>.instance.Info(stackTrace);
-                    }
-                    ManualSingleton<ILogger>.instance.Flush();
-                }
+                Assembly.LoadFrom("UniverseLib.Mono.dll");
+                Assembly assembly = Assembly.LoadFrom("UnityExplorer.Mono.dll");
+                Type type = assembly.GetType("UnityExplorer.ExplorerStandalone");
+                type.GetMethod("CreateInstance", new Type[] { }).Invoke(null, null);
             }
-            catch { }
+            catch (Exception e)
+            {
+                ManualSingleton<ILogger>.instance.Error(e.Message);
+                ManualSingleton<ILogger>.instance.Error(e.StackTrace);
+                ManualSingleton<ILogger>.instance.Error(e.InnerException.Message);
+                ManualSingleton<ILogger>.instance.Error(e.InnerException.StackTrace);
+            }
         }
     }
 }

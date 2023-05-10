@@ -11,9 +11,9 @@ namespace YLRandomizer.Logging
             _log = log;
         }
 
-        public UnityEngine.ILogHandler logHandler { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public bool logEnabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public UnityEngine.LogType filterLogType { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public UnityEngine.ILogHandler logHandler { get; set; }
+        public bool logEnabled { get; set; }
+        public UnityEngine.LogType filterLogType { get; set; }
 
         public bool IsLogTypeAllowed(UnityEngine.LogType logType)
         {
