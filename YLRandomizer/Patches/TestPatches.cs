@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using NodeCanvas.Tasks.Actions;
 using YLRandomizer.Logging;
 
 namespace YLRandomizer.Patches
@@ -53,14 +52,4 @@ namespace YLRandomizer.Patches
              */
         }
     }
-
-    //[HarmonyPatch(typeof(BeeSwarmAttackedPlayerEvent), "OnEvent")]
-    //public class BeeSwarmAttackedPlayerEvent_OnEvent
-    //{
-    //    [HarmonyPostfix]
-    //    public static void Postfix(int index, Savegame.CollectionStatus status)
-    //    {
-    //        ManualSingleton<ILogger>.instance.Debug($"BeeSwarmAttackedPlayerEvent_OnEvent.Postfix(): {index}, {status}");
-    //    }
-    //}
 }

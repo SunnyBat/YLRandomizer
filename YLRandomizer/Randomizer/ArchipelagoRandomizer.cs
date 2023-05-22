@@ -23,6 +23,8 @@ namespace YLRandomizer.Randomizer
     // amount of saves (probably go with 10k or something). Have a backup in case we
     // hit this number that prints a message letting the user know the need to clean
     // up their AP saves.
+    // Looks like there's some additional logic that would need to be patched, maybe
+    // for another time :(
     public class ArchipelagoRandomizer : IRandomizer
     {
         public event ItemReceivedCallback ItemReceived;

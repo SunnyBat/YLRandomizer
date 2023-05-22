@@ -12,7 +12,7 @@ namespace YLRandomizer.Patches
         {
             if (tonic == ETonics.Athlete) // Unlocked after beating CapitalB
             {
-                ManualSingleton<IRandomizer>.instance.GameCompleted();
+                ManualSingleton<IRandomizer>.instance.SetGameCompleted();
             }
         }
     }
