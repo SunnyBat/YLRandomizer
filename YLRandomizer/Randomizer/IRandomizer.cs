@@ -23,6 +23,12 @@
         /// </summary>
         /// <param name="locationIds">The IDs of the locations to set as checked</param>
         void LocationChecked(params long[] locationIds);
+        void SetNotInGame();
+        void SetInGame();
+        /// <summary>
+        /// Run to complete the game.
+        /// </summary>
+        void SetGameCompleted();
         /// <summary>
         /// Subscribe to item received events. These are items that should be added to this
         /// game's unlocked item list. Note that this will send ALL items received exactly

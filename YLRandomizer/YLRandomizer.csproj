@@ -75,6 +75,10 @@
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Archipelago.MultiClient.Net.5.0.4\lib\net35\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Rewired_Core">
+      <HintPath>..\..\..\..\Program Files\Epic Games\Yooka_Laylee\YookaLaylee64_Data\Managed\Rewired_Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -83,6 +87,10 @@
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\Program Files\Epic Games\Yooka_Laylee\YookaLaylee64_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.Networking">
+      <HintPath>..\..\..\..\Program Files\Epic Games\Yooka_Laylee\YookaLaylee64_Data\Managed\UnityEngine.Networking.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
@@ -99,6 +107,8 @@
     <Compile Include="Data\IUserMessages.cs" />
     <Compile Include="Data\UserMessages.cs" />
     <Compile Include="Logging\BepInExLogger.cs" />
+    <Compile Include="Patches\TonicManagerPatches.cs" />
+    <Compile Include="Patches\TestPatches.cs" />
     <Compile Include="YLRandomizer.cs" />
     <Compile Include="Logging\BlendedLogger.cs" />
     <Compile Include="Logging\DirectedLogger.cs" />
@@ -121,6 +131,7 @@
     <Analyzer Include="..\packages\BepInEx.Analyzers.1.0.8\analyzers\dotnet\cs\BepInEx.Analyzers.CodeFixes.dll" />
     <Analyzer Include="..\packages\BepInEx.Analyzers.1.0.8\analyzers\dotnet\cs\BepInEx.Analyzers.dll" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>if not exist "C:\Program Files\Epic Games\Yooka_Laylee\BepInEx\plugins\YLRandomizer" mkdir "C:\Program Files\Epic Games\Yooka_Laylee\BepInEx\plugins\YLRandomizer"

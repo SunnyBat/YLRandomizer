@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
+using System.Linq;
 using YLRandomizer.Data;
 using YLRandomizer.Logging;
 using YLRandomizer.Randomizer;
@@ -95,6 +96,17 @@ namespace YLRandomizer.Patches
             // - Set unspent pagies based off of items from Archipelago and worlds unlocked
             var totalPagies = receivedItems.Length;
             SavegameManager.instance.savegame.player.unspentPagies = totalPagies - spentPagies;
+
+            // == HANDLE GAME STATE ==
+            var endGameTonicInfo = TonicManager.instance.UnlockRequirements.FindAll(req => req.Tonic == ETonics.Athlete);
+            if (endGameTonicInfo.Count > 0 && endGameTonicInfo.All(req => GameStatManager.instance.HasConditionBeenMet(req.Condition)))
+            {
+                ManualSingleton<IRandomizer>.instance.SetGameCompleted();
+            }
+            else
+            {
+                ManualSingleton<IRandomizer>.instance.SetInGame();
+            }
         }
     }
 

@@ -1,5 +1,7 @@
 ﻿using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
+using Archipelago.MultiClient.Net.Packets;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -9,6 +11,18 @@ using YLRandomizer.Logging;
 
 namespace YLRandomizer.Randomizer
 {
+    // TODO Make Archipelago use slot indeces 3+
+    // This will:
+    // - Not overwrite users' current saves
+    // - Allow an infinite amount of slots
+    // - Auto-recall saves so users don't accidentally use the wrong one
+    // Use _session.RoomState.Seed to distinguish between seeds. Use a file to map
+    // the seed to the slot number. Always increment the slot number up.
+    // Slot number has some hardcoded values (probably just the SavegameManager save
+    // array), we'll need to overwrite this ASAP so it supports an arbitrarily large
+    // amount of saves (probably go with 10k or something). Have a backup in case we
+    // hit this number that prints a message letting the user know the need to clean
+    // up their AP saves.
     public class ArchipelagoRandomizer : IRandomizer
     {
         public event ItemReceivedCallback ItemReceived;
@@ -31,6 +45,8 @@ namespace YLRandomizer.Randomizer
         private readonly object _sessionLock = new object();
         private int _sequentialConnectionAttempts = 0;
         private ArchipelagoSession _session;
+        private ArchipelagoClientState _currentGameState = ArchipelagoClientState.ClientUnknown;
+        private ArchipelagoClientState _lastSentGameState = ArchipelagoClientState.ClientUnknown;
         private readonly Queue<NetworkItem> _itemReceivedQueue = new Queue<NetworkItem>();
         private readonly Queue<long> _locationReceivedQueue = new Queue<long>();
         private readonly Queue<string> _messageReceivedQueue = new Queue<string>();
@@ -127,6 +143,7 @@ namespace YLRandomizer.Randomizer
                                     {
                                         _messageReceivedQueue.Enqueue("FATAL: Max connection attempts reached.");
                                         _killed = true;
+                                        _lastSentGameState = ArchipelagoClientState.ClientUnknown;
                                         continue;
                                     }
                                 }
@@ -225,6 +242,30 @@ namespace YLRandomizer.Randomizer
             }
         }
 
+        public void SetNotInGame()
+        {
+            lock (_threadLock)
+            {
+                _currentGameState = ArchipelagoClientState.ClientReady;
+            }
+        }
+
+        public void SetInGame()
+        {
+            lock (_threadLock)
+            {
+                _currentGameState = ArchipelagoClientState.ClientPlaying;
+            }
+        }
+
+        public void SetGameCompleted()
+        {
+            lock (_threadLock)
+            {
+                _currentGameState = ArchipelagoClientState.ClientGoal;
+            }
+        }
+
         public void Tick()
         {
             lock (_threadLock)
@@ -300,6 +341,25 @@ namespace YLRandomizer.Randomizer
                     ManualSingleton<ILogger>.instance.Error(e.StackTrace);
                 }
             });
+            ArchipelagoClientState? gameStateToSend = null;
+            lock (_threadLock)
+            {
+                if (_currentGameState != _lastSentGameState)
+                {
+                    gameStateToSend = _currentGameState;
+                    _lastSentGameState = _currentGameState;
+                }
+            }
+            if (gameStateToSend != null)
+            {
+                lock (_sessionLock)
+                {
+                    _session.Socket.SendPacket(new StatusUpdatePacket()
+                    {
+                        Status = (ArchipelagoClientState)gameStateToSend
+                    });
+                }
+            }
         }
 
         public void EndRandomizer()
@@ -307,6 +367,7 @@ namespace YLRandomizer.Randomizer
             lock (_threadLock)
             {
                 _killed = true;
+                _lastSentGameState = ArchipelagoClientState.ClientUnknown;
             }
         }
 
