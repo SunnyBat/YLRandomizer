@@ -54,5 +54,30 @@ namespace YLRandomizer
             guiGameobject.AddComponent<ArchipelagoUI>();
             UnityEngine.GameObject.DontDestroyOnLoad(guiGameobject);
         }
+
+        private void getClosestPagie()
+        {
+            var playerPosition = UnityEngine.Object.FindObjectOfType<PlayerDev>().transform.position;
+            var pagies = UnityEngine.Object.FindObjectsOfType<PagiePickup>();
+            var closestPagieIndex = -1;
+            float closestDistance = 9999999f;
+            for (int i = 0; i < pagies.Length; i++)
+            {
+                if (pagies[i].GetCollectionStatus() != Savegame.CollectionStatus.Collected)
+                {
+                    var distanceAway = UnityEngine.Vector3.Distance(playerPosition, pagies[i].gameObject.transform.position);
+                    if (closestDistance > distanceAway)
+                    {
+                        closestPagieIndex = i;
+                        closestDistance = distanceAway;
+                    }
+                }
+            }
+            if (closestPagieIndex >= 0)
+            {
+                UnityEngine.Debug.Log(pagies[closestPagieIndex].identifier + ": " + pagies[closestPagieIndex].name);
+                UnityEngine.Debug.Log(closestDistance);
+            }
+        }
     }
 }
