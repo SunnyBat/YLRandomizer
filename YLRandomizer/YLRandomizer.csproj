@@ -107,6 +107,7 @@
     <Compile Include="Data\IUserMessages.cs" />
     <Compile Include="Data\UserMessages.cs" />
     <Compile Include="Logging\BepInExLogger.cs" />
+    <Compile Include="Patches\FrontendSavegameScreenControllerPatch.cs" />
     <Compile Include="Patches\TonicManagerPatches.cs" />
     <Compile Include="Patches\TestPatches.cs" />
     <Compile Include="YLRandomizer.cs" />
