@@ -45,14 +45,18 @@ namespace YLRandomizer.Data
                         var playerCam = camera?.GetCurrentCamera();
                         if (playerCam != null && player != null)
                         {
-                            var directionVector = closestPagie.gameObject.transform.position - player.transform.position;
-                            directionVector.Normalize();
-                            var fcType = playerCam.GetType();
-                            var fcVar = fcType.GetField("mLookDirection", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-                            var lookDir = (UnityEngine.Vector3)fcVar.GetValue(playerCam);
-                            var angleTo = UnityEngine.Vector3.Angle(directionVector, lookDir);
-                            var distanceFromPlayer = UnityEngine.Vector3.Distance(player.transform.position, closestPagie.gameObject.transform.position);
-                            closestPagieMessage = $"i={closestPagie.identifier} :: angle={angleTo} :: dist={distanceFromPlayer} :: name={closestPagie.name}";
+                            try
+                            {
+                                var directionVector = closestPagie.gameObject.transform.position - player.transform.position;
+                                directionVector.Normalize();
+                                var fcType = playerCam.GetType();
+                                var fcVar = fcType.GetField("mLookDirection", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                                var lookDir = (UnityEngine.Vector3)fcVar.GetValue(playerCam);
+                                var angleTo = UnityEngine.Vector3.Angle(directionVector, lookDir);
+                                var distanceFromPlayer = UnityEngine.Vector3.Distance(player.transform.position, closestPagie.gameObject.transform.position);
+                                closestPagieMessage = $"i={closestPagie.identifier} :: angle={angleTo} :: dist={distanceFromPlayer} :: name={closestPagie.name}";
+                            }
+                            catch { } // Mostly for when camera is controlled by cutscene, since value we get by reflecting into it (I think that's where it dies...) is invalid
                         }
                         else
                         {

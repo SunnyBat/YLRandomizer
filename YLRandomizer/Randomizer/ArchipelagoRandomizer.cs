@@ -152,7 +152,7 @@ namespace YLRandomizer.Randomizer
                                 LoginResult result;
                                 lock (_sessionLock)
                                 {
-                                    result = _session.TryConnectAndLogin("YookaLaylee", username, Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, new Version(1, 0, 0), password: password);
+                                    result = _session.TryConnectAndLogin("Yooka Laylee", username, Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, new Version(1, 0, 0), password: password);
                                 }
                                 if (result.Successful)
                                 {
@@ -356,6 +356,7 @@ namespace YLRandomizer.Randomizer
             {
                 lock (_sessionLock)
                 {
+                    ManualSingleton<ILogger>.instance.Info("Setting game state to " + gameStateToSend);
                     _session.Socket.SendPacket(new StatusUpdatePacket()
                     {
                         Status = (ArchipelagoClientState)gameStateToSend

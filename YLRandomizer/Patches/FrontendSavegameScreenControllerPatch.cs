@@ -13,15 +13,15 @@ namespace YLRandomizer.Patches
         public static bool SometimesReplace(BaseEventData eventData)
         {
             ManualSingleton<ILogger>.instance.Debug($"FrontendSavegameScreenController_OnSubmit.SometimesReplace()");
-            if (ManualSingleton<IRandomizer>.instance != null)
+            if (ManualSingleton<IRandomizer>.instance == null)
             {
                 ManualSingleton<IUserMessages>.instance.AddMessage("Not connected to Archipelago, cannot load save!");
                 ManualSingleton<IUserMessages>.instance.AddMessage("Connect before loading the save.");
-                return true;
+                return false;
             }
             else
             {
-                return false;
+                return true;
             }
         }
     }
