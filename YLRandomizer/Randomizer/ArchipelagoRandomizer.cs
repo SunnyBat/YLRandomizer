@@ -191,8 +191,8 @@ namespace YLRandomizer.Randomizer
                     }
                     catch (Exception e)
                     {
-                        ManualSingleton<ILogger>.instance?.Error(e.Message);
-                        ManualSingleton<ILogger>.instance?.Error(e.StackTrace);
+                        ManualSingleton<ILogger>.instance.Error(e.Message);
+                        ManualSingleton<ILogger>.instance.Error(e.StackTrace);
                     }
                 }
             }).Start();
@@ -208,7 +208,7 @@ namespace YLRandomizer.Randomizer
                     // - _session is never changed
                     // - Items is never changed
                     // - AllItemsReceived is thread-safe
-                    return _session.Items.AllItemsReceived.Select(itm => itm.Item).Distinct().ToArray();
+                    return _session.Items.AllItemsReceived.Select(itm => itm.Item).ToArray();
                 }
                 else
                 {
@@ -356,7 +356,7 @@ namespace YLRandomizer.Randomizer
             {
                 lock (_sessionLock)
                 {
-                    ManualSingleton<ILogger>.instance.Info("Setting game state to " + gameStateToSend);
+                    ManualSingleton<ILogger>.instance.Debug("Setting game state to " + gameStateToSend);
                     _session.Socket.SendPacket(new StatusUpdatePacket()
                     {
                         Status = (ArchipelagoClientState)gameStateToSend

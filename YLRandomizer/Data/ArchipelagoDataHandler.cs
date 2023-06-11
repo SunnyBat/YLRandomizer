@@ -13,15 +13,23 @@ namespace YLRandomizer.Data
             };
             ManualSingleton<IRandomizer>.instance.ItemReceived += (itemId) =>
             {
+                var playerInstance = SavegameManager.instance?.savegame?.player;
+                if (playerInstance != null)
+                {
+                    playerInstance.unspentPagies++;
+                    HudController.instance.UpdatePagieCounter(false); // TODO Show or not show?
+                }
                 ManualSingleton<Logging.ILogger>.instance.Info("Pagie received: " + itemId);
-                SavegameManager.instance.savegame.player.unspentPagies++;
-                HudController.instance.UpdatePagieCounter(false); // TODO Show or not show?
             };
             ManualSingleton<IRandomizer>.instance.LocationReceived += (locationId) =>
             {
                 ManualSingleton<Logging.ILogger>.instance.Info("Location marked as checked: " + locationId);
-                var pagieData = ArchipelagoLocationConverter.GetPagieInfo(locationId);
-                SavegameManager.instance.savegame.worlds[pagieData.Item1].pagies[pagieData.Item2] = Savegame.CollectionStatus.Collected;
+                var apPagieData = ArchipelagoLocationConverter.GetPagieInfo(locationId);
+                var worldPagieData = SavegameManager.instance?.savegame?.worlds?[apPagieData.Item1]?.pagies;
+                if (worldPagieData != null)
+                {
+                    worldPagieData[apPagieData.Item2] = Savegame.CollectionStatus.Collected;
+                }
             };
         }
     }
