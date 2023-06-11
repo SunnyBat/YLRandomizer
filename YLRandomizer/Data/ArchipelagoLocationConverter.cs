@@ -2,8 +2,8 @@
 {
     public class ArchipelagoLocationConverter
     {
-        public const long LOCATION_ID_BASE = 52000; // TODO Actual value
-        public const long PAGIES_PER_WORLD = 30; // 5 are ignored, but still need for correct calculations
+        public const long LOCATION_ID_BASE = 50500;
+        public const long PAGIES_PER_WORLD = 30; // 5 (10 in Hivory Towers) are ignored, but still need for correct calculations
 
         public static long GetLocationId(int worldIndex, int pagieIndex)
         {
