@@ -2,6 +2,7 @@
 {
     public class Constants
     {
+        public const bool MOD_DEBUG = false;
         public const long LOCATION_ID_BASE = 50500;
         public const long PAGIES_PER_WORLD = 30; // 5 (10 in Hivory Towers) are ignored, but still need for correct calculations
         public const int PAGIE_ITEM_ID = 50000;

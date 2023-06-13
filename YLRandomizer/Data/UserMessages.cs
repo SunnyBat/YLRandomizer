@@ -27,7 +27,7 @@ namespace YLRandomizer.Data
                 _messages.Dequeue();
                 _messageTimes.Dequeue();
             }
-            if (_messages.Count == 0)
+            if (Constants.MOD_DEBUG && _messages.Count == 0)
             {
                 if (DateTime.Now - lastUpdatedObjectsTime > OBJECTS_UPDATE_TIME)
                 {
