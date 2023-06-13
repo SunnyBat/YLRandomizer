@@ -16,7 +16,7 @@ namespace YLRandomizer.Patches
         [HarmonyPrefix]
         public static bool SometimesReplace(Conversation.DialogOption option, ShowQuestion __instance)
         {
-            ManualSingleton<ILogger>.instance.Info($"ShowQuestion_OnConversationOptionPicked.Postfix(): {option}");
+            ManualSingleton<ILogger>.instance.Debug($"ShowQuestion_OnConversationOptionPicked.Postfix(): {option}");
             if (option == Conversation.DialogOption.Accept && Constants.UnlockEventNames.Contains(LastClosedConversation))
             {
                 int requiredPagieCount = 0;

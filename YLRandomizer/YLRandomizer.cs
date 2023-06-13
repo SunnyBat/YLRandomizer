@@ -8,7 +8,7 @@ using BepInEx;
 
 namespace YLRandomizer
 {
-    [BepInPlugin("50feeca9-9265-4972-b7f8-af7d5b4889fb", "YLRandomizer", "0.2.0")]
+    [BepInPlugin("50feeca9-9265-4972-b7f8-af7d5b4889fb", "YLRandomizer", "1.0.0")]
     public class YLRandomizer : BaseUnityPlugin
     {
         private bool _patched = false;
@@ -42,7 +42,7 @@ namespace YLRandomizer
                 {
                     ManualSingleton<ILogger>.instance.Error(e.Message);
                     ManualSingleton<ILogger>.instance.Error(e.StackTrace);
-                    ManualSingleton<ILogger>.instance.Error("Error patching game. Future patches will be retried, but could break.");
+                    ManualSingleton<ILogger>.instance.Critical("Error patching game. YLRandomizer will likely not work as expected, if at all.");
                 }
             }
         }

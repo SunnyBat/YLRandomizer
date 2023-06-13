@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using YLRandomizer.Logging;
+using YLRandomizer.Randomizer;
 
 namespace YLRandomizer.Patches
 {
@@ -7,10 +8,16 @@ namespace YLRandomizer.Patches
     public class ShowConversation_OnConversationEnd
     {
         [HarmonyPostfix]
-        public static void Postfix(ConversationEndEvent convoEndEvent, ShowConversation __instance)
+        public static void Postfix(ConversationEndEvent convoEndEvent)
         {
-            ManualSingleton<ILogger>.instance.Info($"ShowConversation_OnConversationEnd.Postfix(): {convoEndEvent.mConversationData.name}, {convoEndEvent.mInterrupted}, {convoEndEvent.mConversationData.table}");
+            ManualSingleton<ILogger>.instance.Debug($"ShowConversation_OnConversationEnd.Postfix(): {convoEndEvent.mConversationData.name}, {convoEndEvent.mInterrupted}, {convoEndEvent.mConversationData.table}");
             ShowQuestion_OnConversationOptionPicked.LastClosedConversation = convoEndEvent.mConversationData.name;
+
+            // Technically not what we want. We want the cutscene itself, which is in SetCutscene, but it's hard to pull any unique identifier from it :(
+            if (convoEndEvent.mConversationData.name == "EndCutscene11") // First dialog in cutscene immediately after beating game -- not required to hit if cutscene is skipped
+            {
+                ManualSingleton<IRandomizer>.instance.SetGameCompleted();
+            }
         }
     }
 }

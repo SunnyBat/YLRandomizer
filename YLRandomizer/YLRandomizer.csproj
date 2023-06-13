@@ -105,9 +105,7 @@
     <Compile Include="Patches\SetCutscenePatches.cs" />
     <Compile Include="Patches\ShowConversationPatches.cs" />
     <Compile Include="Patches\ShowQuestionPatches.cs" />
-    <Compile Include="Patches\TextManagerPatches.cs" />
     <Compile Include="Patches\TonicManagerPatches.cs" />
-    <Compile Include="Patches\TestPatches.cs" />
     <Compile Include="YLRandomizer.cs" />
     <Compile Include="Logging\BlendedLogger.cs" />
     <Compile Include="Logging\DirectedLogger.cs" />
