@@ -2,8 +2,7 @@
 {
     public class ArchipelagoLocationConverter
     {
-        public const long LOCATION_ID_BASE = 50500;
-        public const long PAGIES_PER_WORLD = 30; // 5 (10 in Hivory Towers) are ignored, but still need for correct calculations
+        private static readonly int[] _worldIndexTranslations = new int[] { -1, 0, 1, 5, 4, 2, 3, -1 };
 
         public static long GetLocationId(int worldIndex, int pagieIndex)
         {
@@ -16,14 +15,15 @@
             // 5 = Glitterglaze Glacier
             // 6 = Moodymaze Marsh
             // 7 = Nothing
-            var pagieAddition = (worldIndex - 1) * PAGIES_PER_WORLD;
-            return LOCATION_ID_BASE + pagieAddition + pagieIndex;
+            var translatedWorldIndex = _worldIndexTranslations[worldIndex];
+            var pagieAddition = translatedWorldIndex * Constants.PAGIES_PER_WORLD;
+            return Constants.LOCATION_ID_BASE + pagieAddition + pagieIndex;
         }
 
         public static Tuple<int, int> GetPagieInfo(long locationId)
         {
-            var pagieOnly = locationId - LOCATION_ID_BASE;
-            return new Tuple<int, int>((int)(pagieOnly / PAGIES_PER_WORLD) + 1, (int) (pagieOnly % PAGIES_PER_WORLD));
+            var pagieOnly = locationId - Constants.LOCATION_ID_BASE;
+            return new Tuple<int, int>((int)(pagieOnly / Constants.PAGIES_PER_WORLD) + 1, (int) (pagieOnly % Constants.PAGIES_PER_WORLD));
         }
     }
 }
