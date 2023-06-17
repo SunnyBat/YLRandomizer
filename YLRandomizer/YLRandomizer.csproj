@@ -100,12 +100,14 @@
     <Compile Include="Data\IUserMessages.cs" />
     <Compile Include="Data\UserMessages.cs" />
     <Compile Include="Data\WorldUnlockCalculator.cs" />
+    <Compile Include="GameAnalysis\GameState.cs" />
     <Compile Include="Logging\BepInExLogger.cs" />
     <Compile Include="Patches\FrontendSavegameScreenControllerPatch.cs" />
     <Compile Include="Patches\SetCutscenePatches.cs" />
     <Compile Include="Patches\ShowConversationPatches.cs" />
     <Compile Include="Patches\ShowQuestionPatches.cs" />
     <Compile Include="Patches\TonicManagerPatches.cs" />
+    <Compile Include="Utilities.cs" />
     <Compile Include="YLRandomizer.cs" />
     <Compile Include="Logging\BlendedLogger.cs" />
     <Compile Include="Logging\DirectedLogger.cs" />

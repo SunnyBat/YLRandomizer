@@ -12,7 +12,7 @@ namespace YLRandomizer.Scripts
 
         void OnGUI()
         {
-            if (ManualSingleton<IRandomizer>.instance == null)
+            if (ManualSingleton<IRandomizer>.instance == null || !ManualSingleton<IRandomizer>.instance.IsConfigured())
             {
                 _drawShadedRectangle(new Rect(10, 30, 320, 86));
                 Cursor.lockState = CursorLockMode.None;

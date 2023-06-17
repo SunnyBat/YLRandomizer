@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using YLRandomizer.Logging;
+using static PlayerXFModels;
 
 namespace YLRandomizer.Randomizer
 {
@@ -30,6 +31,7 @@ namespace YLRandomizer.Randomizer
         public event ItemReceivedCallback ItemReceived;
         public event LocationReceivedCallback LocationReceived;
         public event MessageReceivedCallback MessageReceived;
+        public event Action ReadyToUse;
 
         /// <summary>
         /// The time to wait between sending things (eg location checks) to Archipelago.
@@ -43,6 +45,7 @@ namespace YLRandomizer.Randomizer
         private readonly int MAX_CONNECTION_ATTEMPTS = 3;
 
         private bool _killed = false;
+        private bool _sentReadyToUse = false;
         private readonly object _threadLock = new object();
         private readonly object _sessionLock = new object();
         private int _sequentialConnectionAttempts = 0;
@@ -198,6 +201,22 @@ namespace YLRandomizer.Randomizer
             }).Start();
         }
 
+        public bool IsConfigured()
+        {
+            lock (this)
+            {
+                return !_killed; // Configuration required before randomizer is created
+            }
+        }
+
+        public bool IsReadyToUse()
+        {
+            lock (this)
+            {
+                return !_killed && _lastSentGameState != ArchipelagoClientState.ClientUnknown; // ClientUnknown is proxy for not connected/authenticated
+            }
+        }
+
         public long[] GetAllItems()
         {
             lock (_sessionLock)
@@ -343,24 +362,29 @@ namespace YLRandomizer.Randomizer
                     ManualSingleton<ILogger>.instance.Error(e.StackTrace);
                 }
             });
-            ArchipelagoClientState? gameStateToSend = null;
+            bool shouldFireReadyToUse = false;
             lock (_threadLock)
             {
-                if (_currentGameState != _lastSentGameState)
+                if (!_sentReadyToUse && IsReadyToUse())
                 {
-                    gameStateToSend = _currentGameState;
-                    _lastSentGameState = _currentGameState;
+                    shouldFireReadyToUse = true;
+                    _sentReadyToUse = true;
                 }
             }
-            if (gameStateToSend != null)
+            if (shouldFireReadyToUse)
             {
-                lock (_sessionLock)
+                try
                 {
-                    ManualSingleton<ILogger>.instance.Debug("Setting game state to " + gameStateToSend);
-                    _session.Socket.SendPacket(new StatusUpdatePacket()
+                    ReadyToUse();
+                }
+                catch (Exception e)
+                {
+                    lock (_threadLock)
                     {
-                        Status = (ArchipelagoClientState)gameStateToSend
-                    });
+                        _messageReceivedQueue.Enqueue($"ERROR: Exception while firing ready to use: {e.Message}");
+                    }
+                    ManualSingleton<ILogger>.instance.Error($"Exception while firing ready to use: {e.Message}");
+                    ManualSingleton<ILogger>.instance.Error(e.StackTrace);
                 }
             }
         }
@@ -387,6 +411,26 @@ namespace YLRandomizer.Randomizer
                 lock (_sessionLock)
                 {
                     _session.Locations.CompleteLocationChecks(locationsToSend);
+                }
+            }
+            ArchipelagoClientState? gameStateToSend = null;
+            lock (_threadLock)
+            {
+                if (_currentGameState != _lastSentGameState)
+                {
+                    gameStateToSend = _currentGameState;
+                    _lastSentGameState = _currentGameState;
+                }
+            }
+            if (gameStateToSend != null)
+            {
+                lock (_sessionLock)
+                {
+                    ManualSingleton<ILogger>.instance.Debug("Setting game state to " + gameStateToSend);
+                    _session.Socket.SendPacket(new StatusUpdatePacket()
+                    {
+                        Status = (ArchipelagoClientState)gameStateToSend
+                    });
                 }
             }
         }

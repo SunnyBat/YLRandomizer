@@ -1,4 +1,7 @@
-﻿using YLRandomizer.Randomizer;
+﻿using System.Collections.Generic;
+using System.Linq;
+using YLRandomizer.GameAnalysis;
+using YLRandomizer.Randomizer;
 
 namespace YLRandomizer.Data
 {
@@ -13,24 +16,132 @@ namespace YLRandomizer.Data
             };
             ManualSingleton<IRandomizer>.instance.ItemReceived += (itemId) =>
             {
-                var playerInstance = SavegameManager.instance?.savegame?.player;
-                if (playerInstance != null)
+                if (GameState.IsInGame())
                 {
-                    playerInstance.unspentPagies++;
-                    HudController.instance.UpdatePagieCounter(false); // TODO Show or not show?
+                    var playerInstance = SavegameManager.instance?.savegame?.player;
+                    if (playerInstance != null)
+                    {
+                        playerInstance.unspentPagies++;
+                        HudController.instance.UpdatePagieCounter(false); // TODO Show or not show?
+                    }
+                    ManualSingleton<Logging.ILogger>.instance.Info("Pagie received: " + itemId);
                 }
-                ManualSingleton<Logging.ILogger>.instance.Info("Pagie received: " + itemId);
             };
             ManualSingleton<IRandomizer>.instance.LocationReceived += (locationId) =>
             {
-                ManualSingleton<Logging.ILogger>.instance.Info("Location marked as checked: " + locationId);
-                var apPagieData = ArchipelagoLocationConverter.GetPagieInfo(locationId);
-                var worldPagieData = SavegameManager.instance?.savegame?.worlds?[apPagieData.Item1]?.pagies;
-                if (worldPagieData != null)
+                if (GameState.IsInGame())
                 {
-                    worldPagieData[apPagieData.Item2] = Savegame.CollectionStatus.Collected;
+                    ManualSingleton<Logging.ILogger>.instance.Info("Location marked as checked: " + locationId);
+                    var apPagieData = ArchipelagoLocationConverter.GetPagieInfo(locationId);
+                    var worldPagieData = SavegameManager.instance?.savegame?.worlds?[apPagieData.Item1]?.pagies;
+                    if (worldPagieData != null)
+                    {
+                        worldPagieData[apPagieData.Item2] = Savegame.CollectionStatus.Collected;
+                    }
                 }
             };
+            ManualSingleton<IRandomizer>.instance.ReadyToUse += () =>
+            {
+                UpdateCurrentGameStateToAP();
+            };
+        }
+
+        public static void UpdateCurrentGameStateToAP()
+        {
+            if (GameState.IsInGame())
+            {
+                // === HANDLE EXISTING LOCATIONS ===
+                // - Convert save to location list
+                var locationIds = new List<long>();
+                for (int i = 1; i < 7; i++) // Length 8; 0 and 7 are unused
+                {
+                    var currentWorld = SavegameManager.instance.savegame.worlds[i];
+                    for (int j = 0; j < currentWorld.pagies.Length; j++)
+                    {
+                        if (currentWorld.pagies[j] == Savegame.CollectionStatus.Collected)
+                        {
+                            locationIds.Add(ArchipelagoLocationConverter.GetLocationId(i, j));
+                        }
+                    }
+                }
+                // - Send location list to Archipelago
+                ManualSingleton<IRandomizer>.instance.LocationChecked(locationIds.ToArray());
+
+                // === HANDLE NEW LOCATIONS ===
+                // - Read all locations from Archipelago
+                var foundLocations = ManualSingleton<IRandomizer>.instance.GetAllCheckedLocations();
+                // - Set relevant pagies from Archipelago as found
+                for (int i = 0; i < foundLocations.Length; i++)
+                {
+                    var pagieData = ArchipelagoLocationConverter.GetPagieInfo(foundLocations[i]);
+                    SavegameManager.instance.savegame.worlds[pagieData.Item1].pagies[pagieData.Item2] = Savegame.CollectionStatus.Collected;
+                }
+
+                // === HANDLE RECEIVED ITEMS ===
+                // - Read all items from Archipelago
+                var receivedItems = ManualSingleton<IRandomizer>.instance.GetAllItems();
+                // - Calculate pagies spent on worlds
+                var spentPagies = 0;
+                for (int i = 1; i < 7; i++)
+                {
+                    if (SavegameManager.instance.savegame.worlds[i].worldUnlocked)
+                    {
+                        switch (i)
+                        {
+                            case 2:
+                                spentPagies++;
+                                break;
+                            case 3:
+                                spentPagies += 12;
+                                break;
+                            case 4:
+                                spentPagies += 10;
+                                break;
+                            case 5:
+                                spentPagies += 3;
+                                break;
+                            case 6:
+                                spentPagies += 7;
+                                break;
+                        }
+                    }
+                    if (SavegameManager.instance.savegame.worlds[i].worldExpanded)
+                    {
+                        switch (i)
+                        {
+                            case 2:
+                                spentPagies += 3;
+                                break;
+                            case 3:
+                                spentPagies += 15;
+                                break;
+                            case 4:
+                                spentPagies += 11;
+                                break;
+                            case 5:
+                                spentPagies += 5;
+                                break;
+                            case 6:
+                                spentPagies += 8;
+                                break;
+                        }
+                    }
+                }
+                // - Set unspent pagies based off of items from Archipelago and worlds unlocked
+                var totalPagies = receivedItems.Length;
+                SavegameManager.instance.savegame.player.unspentPagies = totalPagies - spentPagies;
+
+                // == HANDLE GAME STATE ==
+                var endGameTonicInfo = TonicManager.instance.UnlockRequirements.FindAll(req => req.Tonic == ETonics.Athlete);
+                if (endGameTonicInfo.Count > 0 && endGameTonicInfo.All(req => GameStatManager.instance.HasConditionBeenMet(req.Condition)))
+                {
+                    ManualSingleton<IRandomizer>.instance.SetGameCompleted();
+                }
+                else
+                {
+                    ManualSingleton<IRandomizer>.instance.SetInGame();
+                }
+            }
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace YLRandomizer.Randomizer
+﻿using System;
+
+namespace YLRandomizer.Randomizer
 {
     /// <summary>
     /// A randomizer. Note that there must be AT MOST ONE active randomizer at a time.
@@ -7,6 +9,21 @@
     /// </summary>
     public interface IRandomizer
     {
+        /// <summary>
+        /// Checks whether the randomizer is configured. When true, this means that the
+        /// randomizer has been set up with a configuration. Remote randomizers may change this
+        /// to false if the remote service determines the configuration is invalid.
+        /// </summary>
+        /// <returns>True if configured, false if not</returns>
+        bool IsConfigured();
+        /// <summary>
+        /// Checks whether the randomizer is fully ready to use. When true, this means that the
+        /// randomizer is fully set up and will work as intended. Remote randomizers may change
+        /// this if the status of the remote service or connection to the remote service is
+        /// changed or otherwise invalidated.
+        /// </summary>
+        /// <returns>True if ready to use, false if not</returns>
+        bool IsReadyToUse();
         /// <summary>
         /// Gets all items that have been received. This does NOT remove duplicates.
         /// </summary>
@@ -23,7 +40,13 @@
         /// </summary>
         /// <param name="locationIds">The IDs of the locations to set as checked</param>
         void LocationChecked(params long[] locationIds);
+        /// <summary>
+        /// Sets the state of the randomizer to not in game.
+        /// </summary>
         void SetNotInGame();
+        /// <summary>
+        /// Sets the state of the randomizer to in game.
+        /// </summary>
         void SetInGame();
         /// <summary>
         /// Run to complete the game.
@@ -51,6 +74,11 @@
         /// message contents are identical.
         /// </summary>
         event MessageReceivedCallback MessageReceived;
+        /// <summary>
+        /// Fires when the randomizer is ready to play. This corresponds with
+        /// <see cref="IsReadyToUse"/> flipping from false to true.
+        /// </summary>
+        event Action ReadyToUse;
         /// <summary>
         /// Handles local item processing. Be sure to call this on the thread you want to use
         /// for receiving items and locations. This is thread-safe for the specific locations

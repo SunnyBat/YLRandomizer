@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using YLRandomizer.GameAnalysis;
 
 namespace YLRandomizer.Data
 {
@@ -27,7 +28,7 @@ namespace YLRandomizer.Data
                 _messages.Dequeue();
                 _messageTimes.Dequeue();
             }
-            if (Constants.MOD_DEBUG && _messages.Count == 0)
+            if (Constants.MOD_DEBUG)
             {
                 if (DateTime.Now - lastUpdatedObjectsTime > OBJECTS_UPDATE_TIME)
                 {
@@ -68,7 +69,11 @@ namespace YLRandomizer.Data
                         closestPagieMessage = "<No uncollected pagies found>";
                     }
                 }
-                return new string[] { closestPagieMessage };
+                var ret = new List<string>();
+                ret.Add(closestPagieMessage);
+                ret.Add($"Is in game: {GameState.IsInGame()}");
+                ret.AddRange(_messages);
+                return ret.ToArray();
             }
             return _messages.ToArray();
         }
