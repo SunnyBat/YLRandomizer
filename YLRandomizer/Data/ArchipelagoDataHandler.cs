@@ -132,6 +132,8 @@ namespace YLRandomizer.Data
                 SavegameManager.instance.savegame.player.unspentPagies = totalPagies - spentPagies;
 
                 // == HANDLE GAME STATE ==
+                // TODO Maybe make this slightly better, eg don't check tonics but instead just directly call HasConditionBeenMet() (or similar)
+                // with the correct conditions? That way we don't have to go through a Tonic's indirect requirements.
                 var endGameTonicInfo = TonicManager.instance.UnlockRequirements.FindAll(req => req.Tonic == ETonics.Athlete);
                 if (endGameTonicInfo.Count > 0 && endGameTonicInfo.All(req => GameStatManager.instance.HasConditionBeenMet(req.Condition)))
                 {

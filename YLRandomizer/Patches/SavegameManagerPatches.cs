@@ -29,28 +29,4 @@ namespace YLRandomizer.Patches
             ManualSingleton<IRandomizer>.instance?.LocationChecked(ArchipelagoLocationConverter.GetLocationId(DestroyableMonoBehaviourSingleton<WorldInfo>.instance.worldIndex, index));
         }
     }
-
-    [HarmonyPatch(typeof(SavegameManager), nameof(SavegameManager.GetAllPagieCount))]
-    public class SavegameManager_GetAllPagieCount
-    {
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            ManualSingleton<ILogger>.instance.Debug($"SavegameManager_GetAllPagieCount.Postfix()");
-        }
-    }
-
-    [HarmonyPatch(typeof(SavegameManager), nameof(SavegameManager.savegame), MethodType.Getter)]
-    public class SavegameManager_Savegame_Getter
-    {
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            if (!Utilities.StackHasMethods("GetActiveTonic", "GetAllSpecialExtenderTokenCount", "GetCollectPagie"))
-            {
-                ManualSingleton<ILogger>.instance.Debug($"SavegameManager_Savegame_Getter.Postfix()");
-                Utilities.PrintStack();
-            }
-        }
-    }
 }
