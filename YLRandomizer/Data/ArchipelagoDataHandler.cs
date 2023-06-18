@@ -78,8 +78,6 @@ namespace YLRandomizer.Data
                 }
 
                 // === HANDLE RECEIVED ITEMS ===
-                // - Read all items from Archipelago
-                var receivedItems = ManualSingleton<IRandomizer>.instance.GetAllItems();
                 // - Calculate pagies spent on worlds
                 var spentPagies = 0;
                 for (int i = 1; i < 7; i++)
@@ -128,8 +126,8 @@ namespace YLRandomizer.Data
                     }
                 }
                 // - Set unspent pagies based off of items from Archipelago and worlds unlocked
-                var totalPagies = receivedItems.Length;
-                SavegameManager.instance.savegame.player.unspentPagies = totalPagies - spentPagies;
+                var totalPagiesReceived = ManualSingleton<IRandomizer>.instance.GetReceivedPagiesCount();
+                SavegameManager.instance.savegame.player.unspentPagies = totalPagiesReceived - spentPagies;
 
                 // == HANDLE GAME STATE ==
                 // TODO Maybe make this slightly better, eg don't check tonics but instead just directly call HasConditionBeenMet() (or similar)

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using YLRandomizer.Data;
 using YLRandomizer.Logging;
 using static PlayerXFModels;
 
@@ -203,7 +204,7 @@ namespace YLRandomizer.Randomizer
 
         public bool IsConfigured()
         {
-            lock (this)
+            lock (_threadLock)
             {
                 return !_killed; // Configuration required before randomizer is created
             }
@@ -211,7 +212,7 @@ namespace YLRandomizer.Randomizer
 
         public bool IsReadyToUse()
         {
-            lock (this)
+            lock (_threadLock)
             {
                 return !_killed && _lastSentGameState != ArchipelagoClientState.ClientUnknown; // ClientUnknown is proxy for not connected/authenticated
             }
@@ -234,6 +235,11 @@ namespace YLRandomizer.Randomizer
                     return new long[0];
                 }
             }
+        }
+
+        public int GetReceivedPagiesCount()
+        {
+            return GetAllItems().Where(itemId => itemId == Constants.PAGIE_ITEM_ID).Count();
         }
 
         public long[] GetAllCheckedLocations()

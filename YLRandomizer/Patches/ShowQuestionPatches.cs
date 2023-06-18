@@ -37,7 +37,7 @@ namespace YLRandomizer.Patches
                         break;
                     }
                 }
-                int receivedPagieCount = ManualSingleton<IRandomizer>.instance.GetAllItems().Where(itm => itm == Constants.PAGIE_ITEM_ID).Count();
+                int receivedPagieCount = ManualSingleton<IRandomizer>.instance.GetReceivedPagiesCount();
                 if (requiredPagieCount > receivedPagieCount)
                 {
                     // TODO Change from IUserMessages to a custom Conversation and use QueueConversation in ShowConversation to display it

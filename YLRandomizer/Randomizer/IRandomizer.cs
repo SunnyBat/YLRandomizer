@@ -27,13 +27,18 @@ namespace YLRandomizer.Randomizer
         /// <summary>
         /// Gets all items that have been received. This does NOT remove duplicates.
         /// </summary>
-        /// <returns>An array of all the items that have been received.</returns>
+        /// <returns>An array of all the items that have been received</returns>
         long[] GetAllItems();
         /// <summary>
         /// Gets all locations that have been checked. This should not contain duplicates.
         /// </summary>
-        /// <returns>An array of all the locations that have been checked.</returns>
+        /// <returns>An array of all the locations that have been checked</returns>
         long[] GetAllCheckedLocations();
+        /// <summary>
+        /// Gets the amount of pagies received.
+        /// </summary>
+        /// <returns>The amount of pagies received</returns>
+        int GetReceivedPagiesCount();
         /// <summary>
         /// Run to unlock locations. This may or may not queue up ItemReceived and/or
         /// LocationReceived checks.
