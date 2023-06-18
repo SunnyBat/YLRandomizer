@@ -242,6 +242,38 @@ namespace YLRandomizer.Randomizer
             return GetAllItems().Where(itemId => itemId == Constants.PAGIE_ITEM_ID).Count();
         }
 
+        public int GetReceivedHealthExtenderCount()
+        {
+            return GetAllItems().Where(itemId => itemId == Constants.HEALTH_EXTENDER_ITEM_ID).Count();
+        }
+
+        public int GetReceivedEnergyExtenderCount()
+        {
+            return GetAllItems().Where(itemId => itemId == Constants.ENERGY_EXTENDER_ITEM_ID).Count();
+        }
+
+        public bool[] GetReceivedMollycools()
+        {
+            var itemsReceived = GetAllItems().Where(itemId => itemId >= Constants.MOLLYCOOL_ITEM_ID_START && itemId <= Constants.MOLLYCOOL_ITEM_ID_START + 5);
+            var ret = new bool[5];
+            for (int i = 0; i < ret.Length; i++)
+            {
+                ret[i] = itemsReceived.Contains(Constants.MOLLYCOOL_ITEM_ID_START + i);
+            }
+            return ret;
+        }
+
+        public bool[] GetReceivedPlayCoins()
+        {
+            var itemsReceived = GetAllItems().Where(itemId => itemId >= Constants.PLAYCOIN_ITEM_ID_START && itemId <= Constants.PLAYCOIN_ITEM_ID_START + 5);
+            var ret = new bool[5];
+            for (int i = 0; i < ret.Length; i++)
+            {
+                ret[i] = itemsReceived.Contains(Constants.PLAYCOIN_ITEM_ID_START + i);
+            }
+            return ret;
+        }
+
         public long[] GetAllCheckedLocations()
         {
             lock (_sessionLock)
@@ -259,6 +291,31 @@ namespace YLRandomizer.Randomizer
                     return new long[0];
                 }
             }
+        }
+
+        public long[] GetCheckedPagieLocations()
+        {
+            return GetAllCheckedLocations().Where(locationId => locationId >= Constants.LOCATION_ID_BASE && locationId <= (Constants.LOCATION_ID_BASE + (Constants.PAGIES_PER_WORLD * 6))).ToArray();
+        }
+
+        public long[] GetCheckedMollycoolLocations()
+        {
+            return GetAllCheckedLocations().Where(locationId => locationId >= Constants.MOLLYCOOL_LOCATION_ID_START && locationId <= (Constants.MOLLYCOOL_LOCATION_ID_START + 5)).ToArray();
+        }
+
+        public long[] GetCheckedPlaycoinLocations()
+        {
+            return GetAllCheckedLocations().Where(locationId => locationId >= Constants.PLAYCOIN_LOCATION_ID_START && locationId <= (Constants.PLAYCOIN_LOCATION_ID_START + 5)).ToArray();
+        }
+
+        public long[] GetCheckedHealthExtenderLocations()
+        {
+            return GetAllCheckedLocations().Where(locationId => locationId >= Constants.HEALTH_EXTENDER_LOCATION_ID_START && locationId <= (Constants.HEALTH_EXTENDER_LOCATION_ID_START + 6)).ToArray();
+        }
+
+        public long[] GetCheckedEnergyExtenderLocations()
+        {
+            return GetAllCheckedLocations().Where(locationId => locationId >= Constants.ENERGY_EXTENDER_LOCATION_ID_START && locationId <= (Constants.ENERGY_EXTENDER_LOCATION_ID_START + 6)).ToArray();
         }
 
         public void LocationChecked(params long[] locationIds)

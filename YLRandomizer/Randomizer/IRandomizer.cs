@@ -35,10 +35,59 @@ namespace YLRandomizer.Randomizer
         /// <returns>An array of all the locations that have been checked</returns>
         long[] GetAllCheckedLocations();
         /// <summary>
+        /// Gets the pagie locations that have been checked. This should not contain duplicates.
+        /// </summary>
+        /// <returns>An array of all the pagie locations that have been checked</returns>
+        long[] GetCheckedPagieLocations();
+        /// <summary>
+        /// Gets the mollycool locations that have been checked. This should not contain duplicates.
+        /// </summary>
+        /// <returns>An array of all the mollycool locations that have been checked</returns>
+        long[] GetCheckedMollycoolLocations();
+        /// <summary>
+        /// Gets the playcoin locations that have been checked. This should not contain duplicates.
+        /// </summary>
+        /// <returns>An array of all the playcoin locations that have been checked</returns>
+        long[] GetCheckedPlaycoinLocations();
+        /// <summary>
+        /// Gets the health extender locations that have been checked. This should not contain duplicates.
+        /// </summary>
+        /// <returns>An array of all the health extender locations that have been checked</returns>
+        long[] GetCheckedHealthExtenderLocations();
+        /// <summary>
+        /// Gets the energy extender locations that have been checked. This should not contain duplicates.
+        /// </summary>
+        /// <returns>An array of all the energy extender locations that have been checked</returns>
+        long[] GetCheckedEnergyExtenderLocations();
+        /// <summary>
         /// Gets the amount of pagies received.
         /// </summary>
         /// <returns>The amount of pagies received</returns>
         int GetReceivedPagiesCount();
+        /// <summary>
+        /// Gets the amount of health exteners received.
+        /// </summary>
+        /// <returns>The amount of health extenders received</returns>
+        int GetReceivedHealthExtenderCount();
+        /// <summary>
+        /// Gets the amount of energy extenders received.
+        /// </summary>
+        /// <returns>The amount of energy extenders received</returns>
+        int GetReceivedEnergyExtenderCount();
+        /// <summary>
+        /// Gets whether or not the mollycool for each world has been received. This
+        /// is guaranteed to return an array with exactly 5 elements. The array is
+        /// sorted in logical vanilla world order.
+        /// </summary>
+        /// <returns>The mollycool status for each world</returns>
+        bool[] GetReceivedMollycools();
+        /// <summary>
+        /// Gets whether or not the playcoin for each world has been received. This
+        /// is guaranteed to return an array with exactly 5 elements. The array is
+        /// sorted in logical vanilla world order.
+        /// </summary>
+        /// <returns>The playcoin status for each world</returns>
+        bool[] GetReceivedPlayCoins();
         /// <summary>
         /// Run to unlock locations. This may or may not queue up ItemReceived and/or
         /// LocationReceived checks.

@@ -16,28 +16,58 @@ namespace YLRandomizer.Data
             };
             ManualSingleton<IRandomizer>.instance.ItemReceived += (itemId) =>
             {
+                ManualSingleton<Logging.ILogger>.instance.Debug("Item received: " + itemId);
                 if (GameState.IsInGame())
                 {
-                    var playerInstance = SavegameManager.instance?.savegame?.player;
-                    if (playerInstance != null)
+                    if (itemId == Constants.PAGIE_ITEM_ID)
                     {
-                        playerInstance.unspentPagies++;
-                        HudController.instance.UpdatePagieCounter(false); // TODO Show or not show?
+                        ManualSingleton<Logging.ILogger>.instance.Info("Pagie received: " + itemId);
+                        var playerInstance = SavegameManager.instance?.savegame?.player;
+                        if (playerInstance != null)
+                        {
+                            playerInstance.unspentPagies++;
+                            HudController.instance.UpdatePagieCounter(false); // TODO Show or not show?
+                        }
                     }
-                    ManualSingleton<Logging.ILogger>.instance.Info("Pagie received: " + itemId);
+                    else if (itemId >= Constants.MOLLYCOOL_ITEM_ID_START && itemId <= Constants.MOLLYCOOL_ITEM_ID_START + 4)
+                    {
+                        ManualSingleton<Logging.ILogger>.instance.Info("Mollycool received: " + itemId);
+                        // TODO Check whether we want to update collection status. Assuming no since we override check elsewhere, but if that logic needs to change then put it here.
+                    }
+                    else if (itemId >= Constants.PLAYCOIN_ITEM_ID_START && itemId <= Constants.PLAYCOIN_ITEM_ID_START + 4)
+                    {
+                        ManualSingleton<Logging.ILogger>.instance.Info("Playcoin received: " + itemId);
+                        // TODO Check whether we want to update collection status. Assuming no since we override check elsewhere, but if that logic needs to change then put it here.
+                    }
+                    else if (itemId == Constants.HEALTH_EXTENDER_ITEM_ID)
+                    {
+                        ManualSingleton<Logging.ILogger>.instance.Info("HealthExtender received: " + itemId);
+                        SavegameManager.instance.savegame.player.healthExtenderTokenCount++;
+                    }
+                    else if (itemId == Constants.ENERGY_EXTENDER_ITEM_ID)
+                    {
+                        ManualSingleton<Logging.ILogger>.instance.Info("EnergyExtender received: " + itemId);
+                        SavegameManager.instance.savegame.player.specialExtenderTokenCount++;
+                    }
+                    else
+                    {
+                        ManualSingleton<Logging.ILogger>.instance.Warning("Unknown item received: " + itemId);
+                    }
                 }
             };
+            // TODO remove, we synchronize at the beginning so we don't need to track locations
+            // Just extra work for no reason
             ManualSingleton<IRandomizer>.instance.LocationReceived += (locationId) =>
             {
                 if (GameState.IsInGame())
                 {
                     ManualSingleton<Logging.ILogger>.instance.Info("Location marked as checked: " + locationId);
-                    var apPagieData = ArchipelagoLocationConverter.GetPagieInfo(locationId);
-                    var worldPagieData = SavegameManager.instance?.savegame?.worlds?[apPagieData.Item1]?.pagies;
-                    if (worldPagieData != null)
-                    {
-                        worldPagieData[apPagieData.Item2] = Savegame.CollectionStatus.Collected;
-                    }
+                    //var apPagieData = ArchipelagoLocationConverter.GetPagieInfo(locationId);
+                    //var worldPagieData = SavegameManager.instance?.savegame?.worlds?[apPagieData.Item1]?.pagies;
+                    //if (worldPagieData != null)
+                    //{
+                    //    worldPagieData[apPagieData.Item2] = Savegame.CollectionStatus.Collected;
+                    //}
                 }
             };
             ManualSingleton<IRandomizer>.instance.ReadyToUse += () =>
@@ -60,7 +90,7 @@ namespace YLRandomizer.Data
                     {
                         if (currentWorld.pagies[j] == Savegame.CollectionStatus.Collected)
                         {
-                            locationIds.Add(ArchipelagoLocationConverter.GetLocationId(i, j));
+                            locationIds.Add(ArchipelagoLocationConverter.GetPagieLocationId(i, j));
                         }
                     }
                 }
@@ -69,12 +99,50 @@ namespace YLRandomizer.Data
 
                 // === HANDLE NEW LOCATIONS ===
                 // - Read all locations from Archipelago
-                var foundLocations = ManualSingleton<IRandomizer>.instance.GetAllCheckedLocations();
+                var foundPagieLocations = ManualSingleton<IRandomizer>.instance.GetCheckedPagieLocations();
                 // - Set relevant pagies from Archipelago as found
-                for (int i = 0; i < foundLocations.Length; i++)
+                for (int i = 0; i < foundPagieLocations.Length; i++)
                 {
-                    var pagieData = ArchipelagoLocationConverter.GetPagieInfo(foundLocations[i]);
+                    var pagieData = ArchipelagoLocationConverter.GetPagieInfo(foundPagieLocations[i]);
                     SavegameManager.instance.savegame.worlds[pagieData.Item1].pagies[pagieData.Item2] = Savegame.CollectionStatus.Collected;
+                }
+
+                var foundMollycoolLocations = ManualSingleton<IRandomizer>.instance.GetCheckedMollycoolLocations();
+                for (int i = 0; i < 5; i++)
+                {
+                    SavegameManager.instance.savegame.worlds[Constants.WorldIndexOrder[i]].transformtoken = foundMollycoolLocations.Contains(Constants.MOLLYCOOL_LOCATION_ID_START + i)
+                        ? Savegame.CollectionStatus.Collected
+                        : Savegame.CollectionStatus.Spawned; // TODO Should it always be spawned? Hopefully.
+                }
+
+                var foundPlaycoinLocations = ManualSingleton<IRandomizer>.instance.GetCheckedMollycoolLocations();
+                for (int i = 0; i < 5; i++)
+                {
+                    SavegameManager.instance.savegame.worlds[Constants.WorldIndexOrder[i]].arcadetoken = foundPlaycoinLocations.Contains(Constants.PLAYCOIN_LOCATION_ID_START + i)
+                        ? Savegame.CollectionStatus.Collected
+                        : Savegame.CollectionStatus.Spawned; // TODO Should it always be spawned? Hopefully.
+                }
+
+                var foundHealthExtenderLocations = ManualSingleton<IRandomizer>.instance.GetCheckedHealthExtenderLocations();
+                SavegameManager.instance.savegame.worlds[1].healthextendertoken = foundHealthExtenderLocations.Contains(Constants.HEALTH_EXTENDER_LOCATION_ID_START)
+                        ? Savegame.CollectionStatus.Collected
+                        : Savegame.CollectionStatus.Spawned; // TODO Should it always be spawned? Hopefully.
+                for (int i = 0; i < 5; i++)
+                {
+                    SavegameManager.instance.savegame.worlds[Constants.WorldIndexOrder[i]].healthextendertoken = foundHealthExtenderLocations.Contains(Constants.HEALTH_EXTENDER_LOCATION_ID_START + i + 1)
+                        ? Savegame.CollectionStatus.Collected
+                        : Savegame.CollectionStatus.Spawned; // TODO Should it always be spawned? Hopefully.
+                }
+
+                var foundEnergyExtenderLocations = ManualSingleton<IRandomizer>.instance.GetCheckedEnergyExtenderLocations();
+                SavegameManager.instance.savegame.worlds[1].specialextendertoken = foundEnergyExtenderLocations.Contains(Constants.ENERGY_EXTENDER_LOCATION_ID_START)
+                        ? Savegame.CollectionStatus.Collected
+                        : Savegame.CollectionStatus.Spawned; // TODO Should it always be spawned? Hopefully.
+                for (int i = 0; i < 5; i++)
+                {
+                    SavegameManager.instance.savegame.worlds[Constants.WorldIndexOrder[i]].specialextendertoken = foundEnergyExtenderLocations.Contains(Constants.ENERGY_EXTENDER_LOCATION_ID_START + i + 1)
+                        ? Savegame.CollectionStatus.Collected
+                        : Savegame.CollectionStatus.Spawned; // TODO Should it always be spawned? Hopefully.
                 }
 
                 // === HANDLE RECEIVED ITEMS ===
@@ -128,6 +196,9 @@ namespace YLRandomizer.Data
                 // - Set unspent pagies based off of items from Archipelago and worlds unlocked
                 var totalPagiesReceived = ManualSingleton<IRandomizer>.instance.GetReceivedPagiesCount();
                 SavegameManager.instance.savegame.player.unspentPagies = totalPagiesReceived - spentPagies;
+                SavegameManager.instance.savegame.player.arcadeTokenCount = ManualSingleton<IRandomizer>.instance.GetReceivedPlayCoins().Length;
+                SavegameManager.instance.savegame.player.healthExtenderTokenCount = ManualSingleton<IRandomizer>.instance.GetReceivedHealthExtenderCount();
+                SavegameManager.instance.savegame.player.specialExtenderTokenCount = ManualSingleton<IRandomizer>.instance.GetReceivedEnergyExtenderCount();
 
                 // == HANDLE GAME STATE ==
                 // TODO Maybe make this slightly better, eg don't check tonics but instead just directly call HasConditionBeenMet() (or similar)
