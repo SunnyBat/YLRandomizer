@@ -2,8 +2,6 @@
 {
     public class ArchipelagoLocationConverter
     {
-        private static readonly int[] _worldIndexTranslations = new int[] { -1, 0, 1, 5, 4, 2, 3, -1 };
-
         public static long GetPagieLocationId(int worldIndex, int pagieIndex)
         {
             // World Info
@@ -15,32 +13,32 @@
             // 5 = Glitterglaze Glacier
             // 6 = Moodymaze Marsh
             // 7 = Nothing
-            var translatedWorldIndex = _worldIndexTranslations[worldIndex];
+            var translatedWorldIndex = Constants.WorldIndexToLogicalIndexTranslations[worldIndex];
             var pagieAddition = translatedWorldIndex * Constants.PAGIES_PER_WORLD;
             return Constants.LOCATION_ID_BASE + pagieAddition + pagieIndex;
         }
 
         public static long GetPlaycoinLocationId(int worldIndex)
         {
-            var translatedWorldIndex = _worldIndexTranslations[worldIndex];
+            var translatedWorldIndex = Constants.WorldIndexToLogicalIndexTranslations[worldIndex];
             return Constants.PLAYCOIN_LOCATION_ID_START + translatedWorldIndex - 1; // No playcoin in Hub, offset by 1
         }
 
         public static long GetMollycoolLocationId(int worldIndex)
         {
-            var translatedWorldIndex = _worldIndexTranslations[worldIndex];
+            var translatedWorldIndex = Constants.WorldIndexToLogicalIndexTranslations[worldIndex];
             return Constants.MOLLYCOOL_LOCATION_ID_START + translatedWorldIndex - 1; // No mollycool in Hub, offset by 1
         }
 
         public static long GetHealthExtenderLocationId(int worldIndex)
         {
-            var translatedWorldIndex = _worldIndexTranslations[worldIndex];
+            var translatedWorldIndex = Constants.WorldIndexToLogicalIndexTranslations[worldIndex];
             return Constants.HEALTH_EXTENDER_LOCATION_ID_START + translatedWorldIndex;
         }
 
         public static long GetEnergyExtenderLocationId(int worldIndex)
         {
-            var translatedWorldIndex = _worldIndexTranslations[worldIndex];
+            var translatedWorldIndex = Constants.WorldIndexToLogicalIndexTranslations[worldIndex];
             return Constants.ENERGY_EXTENDER_LOCATION_ID_START + translatedWorldIndex;
         }
 

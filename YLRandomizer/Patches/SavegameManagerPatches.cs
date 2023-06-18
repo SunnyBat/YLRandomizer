@@ -41,7 +41,8 @@ namespace YLRandomizer.Patches
 
             // TODO Do we even care about this? Doesn't look like it's actually used anywhere
             __instance.savegame.player.arcadeTokenCount = ManualSingleton<IRandomizer>.instance.GetReceivedPlayCoins().Length;
-            ManualSingleton<IRandomizer>.instance?.LocationChecked(ArchipelagoLocationConverter.GetPlaycoinLocationId(index));
+            // index is NOT the worldIndex. Sigh.
+            ManualSingleton<IRandomizer>.instance?.LocationChecked(ArchipelagoLocationConverter.GetPlaycoinLocationId(DestroyableMonoBehaviourSingleton<WorldInfo>.instance.worldIndex));
         }
     }
 
@@ -52,11 +53,20 @@ namespace YLRandomizer.Patches
         public static bool AlwaysReplace(ref int __result)
         {
             ManualSingleton<ILogger>.instance.Debug($"SavegameManager_GetArcadeTokenCount.AlwaysReplace()");
-            __result = ManualSingleton<IRandomizer>.instance.GetCheckedPlaycoinLocations()
-                .Contains(ArchipelagoLocationConverter.GetPlaycoinLocationId(DestroyableMonoBehaviourSingleton<WorldInfo>.instance.worldIndex))
-                ? 1
-                : 0;
-            return false;
+            var playCoinIndex = Constants.WorldIndexToLogicalIndexTranslations[DestroyableMonoBehaviourSingleton<WorldInfo>.instance.worldIndex] - 1;
+            var receivedPlayCoins = ManualSingleton<IRandomizer>.instance.GetReceivedPlayCoins();
+            if (playCoinIndex >= 0 && playCoinIndex < receivedPlayCoins.Length)
+            {
+                __result = receivedPlayCoins[playCoinIndex]
+                    ? 1
+                    : 0;
+                return false;
+            }
+            else
+            {
+                __result = 0;
+                return false;
+            }
         }
     }
 
@@ -68,7 +78,8 @@ namespace YLRandomizer.Patches
         {
             ManualSingleton<ILogger>.instance.Debug($"SavegameManager_CollectTransformToken.Postfix()");
 
-            ManualSingleton<IRandomizer>.instance?.LocationChecked(ArchipelagoLocationConverter.GetMollycoolLocationId(index));
+            // index is NOT the worldIndex. Sigh.
+            ManualSingleton<IRandomizer>.instance?.LocationChecked(ArchipelagoLocationConverter.GetMollycoolLocationId(DestroyableMonoBehaviourSingleton<WorldInfo>.instance.worldIndex));
         }
     }
 
@@ -79,11 +90,20 @@ namespace YLRandomizer.Patches
         public static bool AlwaysReplace(ref int __result)
         {
             ManualSingleton<ILogger>.instance.Debug($"SavegameManager_GetTransformationTokenCount.AlwaysReplace()");
-            __result = ManualSingleton<IRandomizer>.instance.GetCheckedMollycoolLocations()
-                .Contains(ArchipelagoLocationConverter.GetMollycoolLocationId(DestroyableMonoBehaviourSingleton<WorldInfo>.instance.worldIndex))
-                ? 1
-                : 0;
-            return false;
+            var mollycoolIndex = Constants.WorldIndexToLogicalIndexTranslations[DestroyableMonoBehaviourSingleton<WorldInfo>.instance.worldIndex] - 1;
+            var receivedMollycools = ManualSingleton<IRandomizer>.instance.GetReceivedMollycools();
+            if (mollycoolIndex >= 0 && mollycoolIndex < receivedMollycools.Length)
+            {
+                __result = receivedMollycools[mollycoolIndex]
+                    ? 1
+                    : 0;
+                return false;
+            }
+            else
+            {
+                __result = 0;
+                return false;
+            }
         }
     }
 
