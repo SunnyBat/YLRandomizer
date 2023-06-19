@@ -116,7 +116,7 @@ namespace YLRandomizer.Patches
             ManualSingleton<ILogger>.instance.Debug($"SavegameManager_CollectHealthExtenderToken.Postfix()");
 
             __instance.savegame.player.healthExtenderTokenCount = ManualSingleton<IRandomizer>.instance.GetReceivedHealthExtenderCount();
-            ManualSingleton<IRandomizer>.instance?.LocationChecked(ArchipelagoLocationConverter.GetHealthExtenderLocationId(index));
+            ManualSingleton<IRandomizer>.instance?.LocationChecked(ArchipelagoLocationConverter.GetHealthExtenderLocationId(DestroyableMonoBehaviourSingleton<WorldInfo>.instance.worldIndex));
         }
     }
 
@@ -130,7 +130,7 @@ namespace YLRandomizer.Patches
 
             // TODO Do we even care about this? Doesn't look like it's actually used anywhere
             __instance.savegame.player.specialExtenderTokenCount = ManualSingleton<IRandomizer>.instance.GetReceivedEnergyExtenderCount();
-            ManualSingleton<IRandomizer>.instance?.LocationChecked(ArchipelagoLocationConverter.GetEnergyExtenderLocationId(index));
+            ManualSingleton<IRandomizer>.instance?.LocationChecked(ArchipelagoLocationConverter.GetEnergyExtenderLocationId(DestroyableMonoBehaviourSingleton<WorldInfo>.instance.worldIndex));
         }
     }
 }

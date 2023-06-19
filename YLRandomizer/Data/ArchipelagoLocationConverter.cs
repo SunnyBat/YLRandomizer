@@ -1,4 +1,7 @@
-﻿namespace YLRandomizer.Data
+﻿using System;
+using System.Linq;
+
+namespace YLRandomizer.Data
 {
     public class ArchipelagoLocationConverter
     {
@@ -45,7 +48,9 @@
         public static Tuple<int, int> GetPagieInfo(long locationId)
         {
             var pagieOnly = locationId - Constants.LOCATION_ID_BASE;
-            return new Tuple<int, int>((int)(pagieOnly / Constants.PAGIES_PER_WORLD) + 1, (int) (pagieOnly % Constants.PAGIES_PER_WORLD));
+            var logicalWorldIndex = (int)(pagieOnly / Constants.PAGIES_PER_WORLD) + 1;
+            var savegameWorldIndex = Array.IndexOf(Constants.WorldIndexToLogicalIndexTranslations, logicalWorldIndex);
+            return new Tuple<int, int>(savegameWorldIndex, (int) (pagieOnly % Constants.PAGIES_PER_WORLD));
         }
     }
 }
