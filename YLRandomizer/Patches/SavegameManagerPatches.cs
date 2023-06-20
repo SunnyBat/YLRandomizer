@@ -50,9 +50,14 @@ namespace YLRandomizer.Patches
     public class SavegameManager_GetArcadeTokenCount
     {
         [HarmonyPrefix]
-        public static bool AlwaysReplace(ref int __result)
+        public static bool SometimesReplace(ref int __result)
         {
-            ManualSingleton<ILogger>.instance.Debug($"SavegameManager_GetArcadeTokenCount.AlwaysReplace()");
+            ManualSingleton<ILogger>.instance.Debug($"SavegameManager_GetArcadeTokenCount.SometimesReplace()");
+            if (Utilities.StackHasMethods("Start")) // TODO Check if other instances where we want to override have Start(), make more specific if so
+            {
+                return true;
+            }
+
             var playCoinIndex = Constants.WorldIndexToLogicalIndexTranslations[DestroyableMonoBehaviourSingleton<WorldInfo>.instance.worldIndex] - 1;
             var receivedPlayCoins = ManualSingleton<IRandomizer>.instance.GetReceivedPlayCoins();
             if (playCoinIndex >= 0 && playCoinIndex < receivedPlayCoins.Length)
@@ -87,9 +92,14 @@ namespace YLRandomizer.Patches
     public class SavegameManager_GetTransformationTokenCount
     {
         [HarmonyPrefix]
-        public static bool AlwaysReplace(ref int __result)
+        public static bool SometimesReplace(ref int __result)
         {
-            ManualSingleton<ILogger>.instance.Debug($"SavegameManager_GetTransformationTokenCount.AlwaysReplace()");
+            ManualSingleton<ILogger>.instance.Debug($"SavegameManager_GetTransformationTokenCount.SometimesReplace()");
+            if (Utilities.StackHasMethods("Start")) // TODO Check if other instances where we want to override have Start(), make more specific if so
+            {
+                return true;
+            }
+
             var mollycoolIndex = Constants.WorldIndexToLogicalIndexTranslations[DestroyableMonoBehaviourSingleton<WorldInfo>.instance.worldIndex] - 1;
             var receivedMollycools = ManualSingleton<IRandomizer>.instance.GetReceivedMollycools();
             if (mollycoolIndex >= 0 && mollycoolIndex < receivedMollycools.Length)

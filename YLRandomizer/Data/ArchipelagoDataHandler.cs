@@ -115,7 +115,7 @@ namespace YLRandomizer.Data
                         : Savegame.CollectionStatus.Spawned; // TODO Should it always be spawned? Hopefully.
                 }
 
-                var foundPlaycoinLocations = ManualSingleton<IRandomizer>.instance.GetCheckedMollycoolLocations();
+                var foundPlaycoinLocations = ManualSingleton<IRandomizer>.instance.GetCheckedPlaycoinLocations();
                 for (int i = 0; i < 5; i++)
                 {
                     SavegameManager.instance.savegame.worlds[Constants.WorldIndexOrder[i]].arcadetoken = foundPlaycoinLocations.Contains(Constants.PLAYCOIN_LOCATION_ID_START + i)
