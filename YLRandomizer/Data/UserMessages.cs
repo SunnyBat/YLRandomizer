@@ -28,54 +28,54 @@ namespace YLRandomizer.Data
                 _messages.Dequeue();
                 _messageTimes.Dequeue();
             }
-            if (Constants.MOD_DEBUG)
+#if DEBUG
+            if (DateTime.Now - lastUpdatedObjectsTime > OBJECTS_UPDATE_TIME)
             {
-                if (DateTime.Now - lastUpdatedObjectsTime > OBJECTS_UPDATE_TIME)
+                player = UnityEngine.Object.FindObjectOfType<PlayerDev>();
+                camera = UnityEngine.Object.FindObjectOfType<CameraManager>();
+                pagies = UnityEngine.Object.FindObjectsOfType<PagiePickup>();
+                lastUpdatedObjectsTime = DateTime.Now;
+            }
+            if (DateTime.Now - lastUpdatedAngleTime > ANGLE_UPDATE_TIME)
+            {
+                lastUpdatedAngleTime = DateTime.Now; // Update early so we get more consistent times between updates
+                var closestPagie = getClosestPagie();
+                if (closestPagie != null)
                 {
-                    player = UnityEngine.Object.FindObjectOfType<PlayerDev>();
-                    camera = UnityEngine.Object.FindObjectOfType<CameraManager>();
-                    pagies = UnityEngine.Object.FindObjectsOfType<PagiePickup>();
-                    lastUpdatedObjectsTime = DateTime.Now;
-                }
-                if (DateTime.Now - lastUpdatedAngleTime > ANGLE_UPDATE_TIME)
-                {
-                    lastUpdatedAngleTime = DateTime.Now; // Update early so we get more consistent times between updates
-                    var closestPagie = getClosestPagie();
-                    if (closestPagie != null)
+                    var playerCam = camera?.GetCurrentCamera();
+                    if (playerCam != null && player != null)
                     {
-                        var playerCam = camera?.GetCurrentCamera();
-                        if (playerCam != null && player != null)
+                        try
                         {
-                            try
-                            {
-                                var directionVector = closestPagie.gameObject.transform.position - player.transform.position;
-                                directionVector.Normalize();
-                                var fcType = playerCam.GetType();
-                                var fcVar = fcType.GetField("mLookDirection", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-                                var lookDir = (UnityEngine.Vector3)fcVar.GetValue(playerCam);
-                                var angleTo = UnityEngine.Vector3.Angle(directionVector, lookDir);
-                                var distanceFromPlayer = UnityEngine.Vector3.Distance(player.transform.position, closestPagie.gameObject.transform.position);
-                                closestPagieMessage = $"i={closestPagie.identifier} :: angle={angleTo} :: dist={distanceFromPlayer} :: name={closestPagie.name}";
-                            }
-                            catch { } // Mostly for when camera is controlled by cutscene, since value we get by reflecting into it (I think that's where it dies...) is invalid
+                            var directionVector = closestPagie.gameObject.transform.position - player.transform.position;
+                            directionVector.Normalize();
+                            var fcType = playerCam.GetType();
+                            var fcVar = fcType.GetField("mLookDirection", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                            var lookDir = (UnityEngine.Vector3)fcVar.GetValue(playerCam);
+                            var angleTo = UnityEngine.Vector3.Angle(directionVector, lookDir);
+                            var distanceFromPlayer = UnityEngine.Vector3.Distance(player.transform.position, closestPagie.gameObject.transform.position);
+                            closestPagieMessage = $"i={closestPagie.identifier} :: angle={angleTo} :: dist={distanceFromPlayer} :: name={closestPagie.name}";
                         }
-                        else
-                        {
-                            closestPagieMessage = "<Unable to calculate pagie data>";
-                        }
+                        catch { } // Mostly for when camera is controlled by cutscene, since value we get by reflecting into it (I think that's where it dies...) is invalid
                     }
                     else
                     {
-                        closestPagieMessage = "<No uncollected pagies found>";
+                        closestPagieMessage = "<Unable to calculate pagie data>";
                     }
                 }
-                var ret = new List<string>();
-                ret.Add(closestPagieMessage);
-                ret.Add($"Is in game: {GameState.IsInGame()}");
-                ret.AddRange(_messages);
-                return ret.ToArray();
+                else
+                {
+                    closestPagieMessage = "<No uncollected pagies found>";
+                }
             }
+            var ret = new List<string>();
+            ret.Add(closestPagieMessage);
+            ret.Add($"Is in game: {GameState.IsInGame()}");
+            ret.AddRange(_messages);
+            return ret.ToArray();
+#else
             return _messages.ToArray();
+#endif
         }
 
         public void AddMessage(string message)

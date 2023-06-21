@@ -9,7 +9,6 @@ using System.Linq;
 using System.Threading;
 using YLRandomizer.Data;
 using YLRandomizer.Logging;
-using static PlayerXFModels;
 
 namespace YLRandomizer.Randomizer
 {

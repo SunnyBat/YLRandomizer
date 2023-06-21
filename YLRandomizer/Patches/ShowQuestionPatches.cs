@@ -16,21 +16,19 @@ namespace YLRandomizer.Patches
         [HarmonyPrefix]
         public static bool SometimesReplace(Conversation.DialogOption option, ShowQuestion __instance)
         {
-            ManualSingleton<ILogger>.instance.Info($"ShowQuestion_OnConversationOptionPicked.Postfix(): {option}");
+            ManualSingleton<ILogger>.instance.Debug($"ShowQuestion_OnConversationOptionPicked.Postfix(): {option}");
             if (option == Conversation.DialogOption.Accept && Constants.UnlockEventNames.Contains(LastClosedConversation))
             {
                 int requiredPagieCount = 0;
                 for (int i = 0; i < Constants.WorldIndexOrder.Length; i++)
                 {
                     int unlockEventNamesIndex = i * 2;
-                    ManualSingleton<ILogger>.instance.Info($"Adding {Constants.UnlockEventNames[unlockEventNamesIndex]} ({WorldUnlockCalculator.getCostForWorldUnlock(Constants.WorldIndexOrder[i])})");
                     requiredPagieCount += WorldUnlockCalculator.getCostForWorldUnlock(Constants.WorldIndexOrder[i]);
                     if (Constants.UnlockEventNames[unlockEventNamesIndex] == LastClosedConversation)
                     {
                         break;
                     }
 
-                    ManualSingleton<ILogger>.instance.Info($"Adding {Constants.UnlockEventNames[unlockEventNamesIndex + 1]} ({WorldUnlockCalculator.getCostForWorldExpand(Constants.WorldIndexOrder[i])})");
                     requiredPagieCount += WorldUnlockCalculator.getCostForWorldExpand(Constants.WorldIndexOrder[i]);
                     if (Constants.UnlockEventNames[unlockEventNamesIndex + 1] == LastClosedConversation)
                     {
