@@ -102,6 +102,7 @@
     <Compile Include="Data\WorldUnlockCalculator.cs" />
     <Compile Include="GameAnalysis\GameState.cs" />
     <Compile Include="Logging\BepInExLogger.cs" />
+    <Compile Include="Patches\LoadingScreenControllerPatch.cs" />
     <Compile Include="Patches\FSMStatePatches.cs" />
     <Compile Include="Patches\GameStatManagerPatches.cs" />
     <Compile Include="Patches\FrontendSavegameScreenControllerPatch.cs" />

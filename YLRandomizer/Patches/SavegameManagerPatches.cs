@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
-using System.Linq;
 using YLRandomizer.Data;
+using YLRandomizer.GameAnalysis;
 using YLRandomizer.Logging;
 using YLRandomizer.Randomizer;
 
@@ -53,8 +53,9 @@ namespace YLRandomizer.Patches
         public static bool SometimesReplace(ref int __result)
         {
             ManualSingleton<ILogger>.instance.Debug($"SavegameManager_GetArcadeTokenCount.SometimesReplace()");
-            if (Utilities.StackHasMethods("Start")) // TODO Check if other instances where we want to override have Start(), make more specific if so
+            if (GameState.IsWithinLoadingScreenWindow()) // If we're loading the world, use vanilla world logic for spawning
             {
+                ManualSingleton<ILogger>.instance.Debug($"Not replacing ({GameState.IsWithinLoadingScreenWindow()}, {Utilities.StackHasMethods("Start")})");
                 return true;
             }
 
@@ -95,8 +96,10 @@ namespace YLRandomizer.Patches
         public static bool SometimesReplace(ref int __result)
         {
             ManualSingleton<ILogger>.instance.Debug($"SavegameManager_GetTransformationTokenCount.SometimesReplace()");
-            if (Utilities.StackHasMethods("Start")) // TODO Check if other instances where we want to override have Start(), make more specific if so
+            Utilities.PrintStack();
+            if (GameState.IsWithinLoadingScreenWindow()) // If we're loading the world, use vanilla world logic for spawning
             {
+                ManualSingleton<ILogger>.instance.Debug($"Not replacing ({GameState.IsWithinLoadingScreenWindow()}, {Utilities.StackHasMethods("Start")})");
                 return true;
             }
 
