@@ -61,7 +61,7 @@ namespace YLRandomizer.Data
             {
                 if (GameState.IsInGame())
                 {
-                    ManualSingleton<Logging.ILogger>.instance.Info("Location marked as checked: " + locationId);
+                    ManualSingleton<Logging.ILogger>.instance.Debug("Location marked as checked: " + locationId);
                     //var apPagieData = ArchipelagoLocationConverter.GetPagieInfo(locationId);
                     //var worldPagieData = SavegameManager.instance?.savegame?.worlds?[apPagieData.Item1]?.pagies;
                     //if (worldPagieData != null)
@@ -76,9 +76,9 @@ namespace YLRandomizer.Data
             };
         }
 
-        public static void UpdateCurrentGameStateToAP()
+        public static void UpdateCurrentGameStateToAP(bool forceLoad = false)
         {
-            if (GameState.IsInGame())
+            if (GameState.IsInGame() || forceLoad)
             {
                 // === HANDLE EXISTING LOCATIONS ===
                 // - Convert save to location list

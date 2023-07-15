@@ -172,6 +172,22 @@ namespace YLRandomizer.Randomizer
                                     {
                                         _messageReceivedQueue.Enqueue("ERROR: Failed to connect to Archipelago server for the following reasons:");
                                         failedRes.Errors.Do(err => _messageReceivedQueue.Enqueue("- " + err));
+                                        failedRes.ErrorCodes.Do(eC => _messageReceivedQueue.Enqueue("= " + eC));
+                                        lock (_sessionLock)
+                                        {
+                                            connected = _session.Socket.Connected;
+                                        }
+                                        if (connected)
+                                        {
+                                            if (failedRes.ErrorCodes.Length > 0)
+                                            {
+                                                _sequentialConnectionAttempts = MAX_CONNECTION_ATTEMPTS; // Got error response from server, don't retry
+                                            }
+                                            lock (_sessionLock)
+                                            {
+                                                _session.Socket.Disconnect();
+                                            }
+                                        }
                                     }
                                     if (_sequentialConnectionAttempts < MAX_CONNECTION_ATTEMPTS)
                                     {

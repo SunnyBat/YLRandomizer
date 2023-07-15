@@ -15,7 +15,7 @@ namespace YLRandomizer.Patches
             ManualSingleton<ILogger>.instance.Debug($"SavegameMamager_Validate.Postfix()");
             // This will be called after a world is loaded.
 
-            ArchipelagoDataHandler.UpdateCurrentGameStateToAP();
+            ArchipelagoDataHandler.UpdateCurrentGameStateToAP(true);
         }
     }
 

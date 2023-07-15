@@ -53,7 +53,7 @@ namespace YLRandomizer.Patches
         {
             if (agent?.name != null && !IgnoredNames.Contains(agent.name))
             {
-                ManualSingleton<ILogger>.instance.Debug($"FSMState_OnExecute.Postfix(): {agent?.name}, {bb?.name}");
+                //ManualSingleton<ILogger>.instance.Debug($"FSMState_OnExecute.Postfix(): {agent?.name}, {bb?.name}");
             }
         }
     }
