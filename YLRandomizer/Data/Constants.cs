@@ -8,11 +8,14 @@
         public const long PLAYCOIN_LOCATION_ID_START = 51030; // 5 total
         public const long HEALTH_EXTENDER_LOCATION_ID_START = 51000; // 6 total
         public const long ENERGY_EXTENDER_LOCATION_ID_START = 51010; // 6 total
+        public const long TROWSER_FREE_ABILITY_LOCATION_ID_START = 51500;
+        public const long TROWSER_PAID_ABILITY_LOCATION_ID_START = 51510;
         public const long PAGIE_ITEM_ID = 50000;
         public const long HEALTH_EXTENDER_ITEM_ID = 50001;
         public const long ENERGY_EXTENDER_ITEM_ID = 50002;
         public const long MOLLYCOOL_ITEM_ID_START = 50010; // 5 total
         public const long PLAYCOIN_ITEM_ID_START = 50020; // 5 total
+        public const long ABILITY_ITEM_ID_START = 50050;
 
         /// <summary>
         /// The order in which book world indeces (eg excluding Hivory Towers) are ordered in SavegameManager.instance.savegame.worlds.

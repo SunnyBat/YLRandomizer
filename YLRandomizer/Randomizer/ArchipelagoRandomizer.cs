@@ -289,6 +289,11 @@ namespace YLRandomizer.Randomizer
             return ret;
         }
 
+        public long[] GetReceivedAbilities()
+        {
+            return GetAllItems().Where(itemId => itemId >= Constants.TROWSER_FREE_ABILITY_LOCATION_ID_START && itemId <= Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START + 8).ToArray();
+        }
+
         public long[] GetAllCheckedLocations()
         {
             lock (_sessionLock)
@@ -331,6 +336,11 @@ namespace YLRandomizer.Randomizer
         public long[] GetCheckedEnergyExtenderLocations()
         {
             return GetAllCheckedLocations().Where(locationId => locationId >= Constants.ENERGY_EXTENDER_LOCATION_ID_START && locationId <= (Constants.ENERGY_EXTENDER_LOCATION_ID_START + 6)).ToArray();
+        }
+
+        public long[] GetCheckedAbilityLocations()
+        {
+            return GetAllCheckedLocations().Where(locationId => locationId >= Constants.TROWSER_FREE_ABILITY_LOCATION_ID_START && locationId <= (Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START + 6)).ToArray();
         }
 
         public void LocationChecked(params long[] locationIds)

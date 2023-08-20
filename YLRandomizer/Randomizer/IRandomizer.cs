@@ -60,6 +60,11 @@ namespace YLRandomizer.Randomizer
         /// <returns>An array of all the energy extender locations that have been checked</returns>
         long[] GetCheckedEnergyExtenderLocations();
         /// <summary>
+        /// Gets the ability locations that have been checked. This should not contain duplicates.
+        /// </summary>
+        /// <returns></returns>
+        long[] GetCheckedAbilityLocations();
+        /// <summary>
         /// Gets the amount of pagies received.
         /// </summary>
         /// <returns>The amount of pagies received</returns>
@@ -88,6 +93,13 @@ namespace YLRandomizer.Randomizer
         /// </summary>
         /// <returns>The playcoin status for each world</returns>
         bool[] GetReceivedPlayCoins();
+        /// <summary>
+        /// Gets the ability location IDs that have been received. This is guaranteed
+        /// to return an array with at least 0 elements. The array has no particular
+        /// order. This should not contain duplicates.
+        /// </summary>
+        /// <returns></returns>
+        long[] GetReceivedAbilities();
         /// <summary>
         /// Run to unlock locations. This may or may not queue up ItemReceived and/or
         /// LocationReceived checks.

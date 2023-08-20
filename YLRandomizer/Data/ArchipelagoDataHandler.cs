@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using HarmonyLib;
+using System.Collections.Generic;
 using System.Linq;
 using YLRandomizer.GameAnalysis;
 using YLRandomizer.Randomizer;
+using static PlayerXFModels;
 
 namespace YLRandomizer.Data
 {
@@ -49,6 +51,12 @@ namespace YLRandomizer.Data
                         ManualSingleton<Logging.ILogger>.instance.Info("EnergyExtender received: " + itemId);
                         SavegameManager.instance.savegame.player.specialExtenderTokenCount++;
                     }
+                    else if (itemId >= Constants.TROWSER_FREE_ABILITY_LOCATION_ID_START && itemId <= Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START + 8)
+                    {
+                        var move = PlayerMoveConverter.GetMoveFromItemId(itemId);
+                        ManualSingleton<Logging.ILogger>.instance.Info("Move received: " + move);
+                        SavegameManager.instance.EnableMove(move, true, false);
+                    }
                     else
                     {
                         ManualSingleton<Logging.ILogger>.instance.Warning("Unknown item received: " + itemId);
@@ -93,6 +101,7 @@ namespace YLRandomizer.Data
                             locationIds.Add(ArchipelagoLocationConverter.GetPagieLocationId(i, j));
                         }
                     }
+                    // TODO Play Coins, Mollycools, Abilities
                 }
                 // - Send location list to Archipelago
                 ManualSingleton<IRandomizer>.instance.LocationChecked(locationIds.ToArray());
@@ -144,6 +153,8 @@ namespace YLRandomizer.Data
                         ? Savegame.CollectionStatus.Collected
                         : Savegame.CollectionStatus.Spawned; // TODO Should it always be spawned? Hopefully.
                 }
+
+                // TODO Abilities
 
                 // === HANDLE RECEIVED ITEMS ===
                 // - Calculate pagies spent on worlds
@@ -199,6 +210,11 @@ namespace YLRandomizer.Data
                 SavegameManager.instance.savegame.player.arcadeTokenCount = ManualSingleton<IRandomizer>.instance.GetReceivedPlayCoins().Length;
                 SavegameManager.instance.savegame.player.healthExtenderTokenCount = ManualSingleton<IRandomizer>.instance.GetReceivedHealthExtenderCount();
                 SavegameManager.instance.savegame.player.specialExtenderTokenCount = ManualSingleton<IRandomizer>.instance.GetReceivedEnergyExtenderCount();
+                var receivedAbilities = ManualSingleton<IRandomizer>.instance.GetReceivedAbilities();
+                for (long i = Constants.ABILITY_ITEM_ID_START; i <= Constants.ABILITY_ITEM_ID_START + 14; i++)
+                {
+                    ManualSingleton<SavegameManager>.instance.EnableMove(PlayerMoveConverter.GetMoveFromItemId(i), receivedAbilities.Any(itemId => itemId == i), false);
+                }
 
                 // == HANDLE GAME STATE ==
                 // TODO Maybe make this slightly better, eg don't check tonics but instead just directly call HasConditionBeenMet() (or similar)
