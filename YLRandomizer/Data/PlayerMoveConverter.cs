@@ -18,11 +18,10 @@ namespace YLRandomizer.Data
                     return PlayerMoves.Moves.SonarShield;
                 case "Wheel Roll": // Reptile Roll
                     return PlayerMoves.Moves.WheelRoll;
-                // TODO: Eat M1k vs 2 vs 3? One seems unused, other two seem to correspond here. Which is which?
-                case "Eat Mk 2": // Slurp Shot?
+                case "Eat Mk 1": // Slurp Shot
+                    return PlayerMoves.Moves.EatMk1;
+                case "Eat Mk 2": // Slurp State
                     return PlayerMoves.Moves.EatMk2;
-                case "Eat Mk 3": // Slurp State?
-                    return PlayerMoves.Moves.EatMk3;
                 case "Wheel Spin Attack": // Reptile Rush
                     return PlayerMoves.Moves.WheelSpinAttack;
                 case "Glide (aka FlapFloat)": // Glide
@@ -64,11 +63,11 @@ namespace YLRandomizer.Data
                 case Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START:
                     return PlayerMoves.Moves.SonarShot;
                 case Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START + 1:
-                    return PlayerMoves.Moves.EatMk2; // TODO Is this right?
+                    return PlayerMoves.Moves.EatMk1;
                 case Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START + 2:
                     return PlayerMoves.Moves.GroundPound;
                 case Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START + 3:
-                    return PlayerMoves.Moves.EatMk3; // TODO Is this right?
+                    return PlayerMoves.Moves.EatMk2;
                 case Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START + 4:
                     return PlayerMoves.Moves.HighJump;
                 case Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START + 5:
@@ -103,11 +102,11 @@ namespace YLRandomizer.Data
                     return Constants.TROWSER_FREE_ABILITY_LOCATION_ID_START + 5;
                 case PlayerMoves.Moves.SonarShot:
                     return Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START;
-                case PlayerMoves.Moves.EatMk2: // TODO Is this right?
+                case PlayerMoves.Moves.EatMk1:
                     return Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START + 1;
                 case PlayerMoves.Moves.GroundPound:
                     return Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START + 2;
-                case PlayerMoves.Moves.EatMk3: // TODO Is this right?
+                case PlayerMoves.Moves.EatMk2:
                     return Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START + 3;
                 case PlayerMoves.Moves.HighJump:
                     return Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START + 4;
@@ -144,11 +143,11 @@ namespace YLRandomizer.Data
                 case Constants.ABILITY_ITEM_ID_START + 6:
                     return PlayerMoves.Moves.SonarShot;
                 case Constants.ABILITY_ITEM_ID_START + 7:
-                    return PlayerMoves.Moves.EatMk2; // TODO Is this right?
+                    return PlayerMoves.Moves.EatMk1;
                 case Constants.ABILITY_ITEM_ID_START + 8:
                     return PlayerMoves.Moves.GroundPound;
                 case Constants.ABILITY_ITEM_ID_START + 9:
-                    return PlayerMoves.Moves.EatMk3; // TODO Is this right?
+                    return PlayerMoves.Moves.EatMk2;
                 case Constants.ABILITY_ITEM_ID_START + 10:
                     return PlayerMoves.Moves.HighJump;
                 case Constants.ABILITY_ITEM_ID_START + 11:
@@ -162,6 +161,74 @@ namespace YLRandomizer.Data
                 default:
                     ManualSingleton<ILogger>.instance.Warning("PlayerMoveConverter.GetMoveFromItemId(): Unknown move: " + itemId);
                     return PlayerMoves.Moves.BasicAttack;
+            }
+        }
+
+        public static long GetItemIdFromMove(PlayerMoves.Moves move)
+        {
+            switch (move)
+            {
+                case PlayerMoves.Moves.BasicAttack:
+                    return Constants.ABILITY_ITEM_ID_START;
+                case PlayerMoves.Moves.WheelRoll:
+                    return Constants.ABILITY_ITEM_ID_START + 1;
+                case PlayerMoves.Moves.Glide:
+                    return Constants.ABILITY_ITEM_ID_START + 2;
+                case PlayerMoves.Moves.FartBubble:
+                    return Constants.ABILITY_ITEM_ID_START + 3;
+                case PlayerMoves.Moves.Invisibility:
+                    return Constants.ABILITY_ITEM_ID_START + 4;
+                case PlayerMoves.Moves.Fly:
+                    return Constants.ABILITY_ITEM_ID_START + 5;
+                case PlayerMoves.Moves.SonarShot:
+                    return Constants.ABILITY_ITEM_ID_START + 6;
+                case PlayerMoves.Moves.EatMk1:
+                    return Constants.ABILITY_ITEM_ID_START + 7;
+                case PlayerMoves.Moves.GroundPound:
+                    return Constants.ABILITY_ITEM_ID_START + 8;
+                case PlayerMoves.Moves.EatMk2:
+                    return Constants.ABILITY_ITEM_ID_START + 9;
+                case PlayerMoves.Moves.HighJump:
+                    return Constants.ABILITY_ITEM_ID_START + 10;
+                case PlayerMoves.Moves.TongueGrappleHook:
+                    return Constants.ABILITY_ITEM_ID_START + 11;
+                case PlayerMoves.Moves.SonarBoom:
+                    return Constants.ABILITY_ITEM_ID_START + 12;
+                case PlayerMoves.Moves.WheelSpinAttack:
+                    return Constants.ABILITY_ITEM_ID_START + 13;
+                case PlayerMoves.Moves.SonarShield:
+                    return Constants.ABILITY_ITEM_ID_START + 14;
+                default:
+                    ManualSingleton<ILogger>.instance.Warning("PlayerMoveConverter.GetItemIdFromMove(): Unknown move: " + move);
+                    return -1;
+            }
+        }
+
+        public static PlayerMoves.Moves GetRequiredAbilityForWorldId(int worldId)
+        {
+            // World Info
+            // 0 = Nothing
+            // 1 = Hivory Towers
+            // 2 = Tribalstack Tropics
+            // 3 = Galleon Galaxy
+            // 4 = Capital Cashino
+            // 5 = Glitterglaze Glacier
+            // 6 = Moodymaze Marsh
+            // 7 = Nothing
+            switch (worldId)
+            {
+                case 2:
+                    return PlayerMoves.Moves.WheelRoll;
+                case 5:
+                    return PlayerMoves.Moves.Glide;
+                case 6:
+                    return PlayerMoves.Moves.FartBubble;
+                case 4:
+                    return PlayerMoves.Moves.Invisibility;
+                case 3:
+                    return PlayerMoves.Moves.Fly;
+                default:
+                    return PlayerMoves.Moves.Fly;
             }
         }
     }

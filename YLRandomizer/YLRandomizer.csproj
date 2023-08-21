@@ -103,10 +103,11 @@
     <Compile Include="Data\WorldUnlockCalculator.cs" />
     <Compile Include="GameAnalysis\GameState.cs" />
     <Compile Include="Logging\BepInExLogger.cs" />
-    <Compile Include="Patches\LoadingScreenControllerPatch.cs" />
+    <Compile Include="Patches\LoadingScreenControllerPatches.cs" />
     <Compile Include="Patches\FSMStatePatches.cs" />
     <Compile Include="Patches\GameStatManagerPatches.cs" />
     <Compile Include="Patches\FrontendSavegameScreenControllerPatch.cs" />
+    <Compile Include="Patches\TrowzaInterfacePatches.cs" />
     <Compile Include="Patches\SetCutscenePatches.cs" />
     <Compile Include="Patches\ShowConversationPatches.cs" />
     <Compile Include="Patches\PlayerMovesPatches.cs" />

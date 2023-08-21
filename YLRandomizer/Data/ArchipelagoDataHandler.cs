@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using YLRandomizer.GameAnalysis;
 using YLRandomizer.Randomizer;
+using static PlayerMoves;
 using static PlayerXFModels;
 
 namespace YLRandomizer.Data
@@ -51,11 +52,17 @@ namespace YLRandomizer.Data
                         ManualSingleton<Logging.ILogger>.instance.Info("EnergyExtender received: " + itemId);
                         SavegameManager.instance.savegame.player.specialExtenderTokenCount++;
                     }
-                    else if (itemId >= Constants.TROWSER_FREE_ABILITY_LOCATION_ID_START && itemId <= Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START + 8)
+                    else if (itemId >= Constants.ABILITY_ITEM_ID_START && itemId <= Constants.ABILITY_ITEM_ID_START + 14)
                     {
                         var move = PlayerMoveConverter.GetMoveFromItemId(itemId);
                         ManualSingleton<Logging.ILogger>.instance.Info("Move received: " + move);
                         SavegameManager.instance.EnableMove(move, true, false);
+                        var playerMoves = UnityEngine.GameObject.FindObjectOfType<PlayerMoves>();
+                        if (playerMoves?.moveDictionary.TryGetValue(move, out var moveToEnable) ?? false)
+                        {
+                            ManualSingleton<Logging.ILogger>.instance.Info("Enabling move: " + moveToEnable.DevName);
+                            moveToEnable.EnableInGame();
+                        }
                     }
                     else
                     {
@@ -154,7 +161,7 @@ namespace YLRandomizer.Data
                         : Savegame.CollectionStatus.Spawned; // TODO Should it always be spawned? Hopefully.
                 }
 
-                // TODO Abilities
+                // TODO Send unlocked ability locations (requires restructuring of SavegameManager usage WRT abilities)
 
                 // === HANDLE RECEIVED ITEMS ===
                 // - Calculate pagies spent on worlds
@@ -211,10 +218,20 @@ namespace YLRandomizer.Data
                 SavegameManager.instance.savegame.player.healthExtenderTokenCount = ManualSingleton<IRandomizer>.instance.GetReceivedHealthExtenderCount();
                 SavegameManager.instance.savegame.player.specialExtenderTokenCount = ManualSingleton<IRandomizer>.instance.GetReceivedEnergyExtenderCount();
                 var receivedAbilities = ManualSingleton<IRandomizer>.instance.GetReceivedAbilities();
+                var playerMoves = UnityEngine.GameObject.FindObjectOfType<PlayerMoves>();
                 for (long i = Constants.ABILITY_ITEM_ID_START; i <= Constants.ABILITY_ITEM_ID_START + 14; i++)
                 {
-                    ManualSingleton<SavegameManager>.instance.EnableMove(PlayerMoveConverter.GetMoveFromItemId(i), receivedAbilities.Any(itemId => itemId == i), false);
+                    var hasReceivedMove = receivedAbilities.Any(itemId => itemId == i);
+                    var move = PlayerMoveConverter.GetMoveFromItemId(i);
+                    SavegameManager.instance.EnableMove(move, hasReceivedMove, false);
+                    ManualSingleton<Logging.ILogger>.instance.Debug("YEET: " + i);
+                    if (hasReceivedMove && playerMoves != null && (playerMoves?.moveDictionary?.TryGetValue(move, out var moveToEnable) ?? false))
+                    {
+                        ManualSingleton<Logging.ILogger>.instance.Info("Enabling move: " + moveToEnable.DevName);
+                        moveToEnable.EnableInGame();
+                    }
                 }
+                ManualSingleton<Logging.ILogger>.instance.Debug("ABILITIES DONE");
 
                 // == HANDLE GAME STATE ==
                 // TODO Maybe make this slightly better, eg don't check tonics but instead just directly call HasConditionBeenMet() (or similar)
