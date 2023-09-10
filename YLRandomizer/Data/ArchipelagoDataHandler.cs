@@ -62,6 +62,11 @@ namespace YLRandomizer.Data
                         {
                             ManualSingleton<Logging.ILogger>.instance.Info("Enabling move: " + moveToEnable.DevName);
                             moveToEnable.EnableInGame();
+                            if (move == Moves.BasicAttack && playerMoves.moveDictionary.TryGetValue(Moves.BasicAttackAir, out var moveToEnable2))
+                            {
+                                ManualSingleton<Logging.ILogger>.instance.Info("Enabling move 2: " + moveToEnable2.DevName);
+                                moveToEnable2.EnableInGame();
+                            }
                         }
                     }
                     else
@@ -224,11 +229,15 @@ namespace YLRandomizer.Data
                     var hasReceivedMove = receivedAbilities.Any(itemId => itemId == i);
                     var move = PlayerMoveConverter.GetMoveFromItemId(i);
                     SavegameManager.instance.EnableMove(move, hasReceivedMove, false);
-                    ManualSingleton<Logging.ILogger>.instance.Debug("YEET: " + i);
                     if (hasReceivedMove && playerMoves != null && (playerMoves?.moveDictionary?.TryGetValue(move, out var moveToEnable) ?? false))
                     {
                         ManualSingleton<Logging.ILogger>.instance.Info("Enabling move: " + moveToEnable.DevName);
                         moveToEnable.EnableInGame();
+                        if (move == Moves.BasicAttack && playerMoves.moveDictionary.TryGetValue(Moves.BasicAttackAir, out var moveToEnable2))
+                        {
+                            ManualSingleton<Logging.ILogger>.instance.Info("Enabling move 2: " + moveToEnable2.DevName);
+                            moveToEnable2.EnableInGame();
+                        }
                     }
                 }
                 ManualSingleton<Logging.ILogger>.instance.Debug("ABILITIES DONE");
