@@ -6,19 +6,6 @@ using YLRandomizer.Randomizer;
 
 namespace YLRandomizer.Patches
 {
-    [HarmonyPatch(typeof(SavegameManager), nameof(SavegameManager.Validate))]
-    public class SavegameManager_Validate
-    {
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            ManualSingleton<ILogger>.instance.Debug($"SavegameMamager_Validate.Postfix()");
-            // This will be called after a world is loaded.
-
-            ArchipelagoDataHandler.UpdateCurrentGameStateToAP(true);
-        }
-    }
-
     [HarmonyPatch(typeof(SavegameManager), nameof(SavegameManager.CollectPagie))]
     public class SavegameManager_CollectPagie
     {

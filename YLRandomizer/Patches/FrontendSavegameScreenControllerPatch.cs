@@ -6,7 +6,7 @@ using YLRandomizer.Randomizer;
 
 namespace YLRandomizer.Patches
 {
-    [HarmonyPatch(typeof(FrontendSavegameScreenController), "OnSubmit")]
+    [HarmonyPatch(typeof(FrontendSavegameScreenController), nameof(FrontendSavegameScreenController.OnSubmit))]
     public class FrontendSavegameScreenController_OnSubmit
     {
         [HarmonyPrefix]
@@ -23,6 +23,18 @@ namespace YLRandomizer.Patches
             {
                 return true;
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(FrontendSavegameScreenController), "StartGame")]
+    public class FrontendSavegameScreenController_StartGame
+    {
+        [HarmonyPrefix]
+        public static bool NeverReplace()
+        {
+            ManualSingleton<ILogger>.instance.Debug($"FrontendSavegameScreenController_StartGame.NeverReplace()");
+            ArchipelagoDataHandler.UpdateCurrentGameStateToAP(true);
+            return true;
         }
     }
 }

@@ -27,18 +27,16 @@ namespace YLRandomizer.Data
                         if (playerInstance != null)
                         {
                             playerInstance.unspentPagies++;
-                            HudController.instance.UpdatePagieCounter(false); // TODO Show or not show?
+                            HudController.instance.UpdatePagieCounter(false);
                         }
                     }
                     else if (itemId >= Constants.MOLLYCOOL_ITEM_ID_START && itemId <= Constants.MOLLYCOOL_ITEM_ID_START + 4)
                     {
                         ManualSingleton<Logging.ILogger>.instance.Info("Mollycool received: " + itemId);
-                        // TODO Check whether we want to update collection status. Assuming no since we override check elsewhere, but if that logic needs to change then put it here.
                     }
                     else if (itemId >= Constants.PLAYCOIN_ITEM_ID_START && itemId <= Constants.PLAYCOIN_ITEM_ID_START + 4)
                     {
                         ManualSingleton<Logging.ILogger>.instance.Info("Playcoin received: " + itemId);
-                        // TODO Check whether we want to update collection status. Assuming no since we override check elsewhere, but if that logic needs to change then put it here.
                     }
                     else if (itemId == Constants.HEALTH_EXTENDER_ITEM_ID)
                     {
