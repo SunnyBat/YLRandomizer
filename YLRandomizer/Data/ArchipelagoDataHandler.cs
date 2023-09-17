@@ -1,10 +1,8 @@
-﻿using HarmonyLib;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using YLRandomizer.GameAnalysis;
 using YLRandomizer.Randomizer;
 using static PlayerMoves;
-using static PlayerXFModels;
 
 namespace YLRandomizer.Data
 {
@@ -65,6 +63,7 @@ namespace YLRandomizer.Data
                             if (move == Moves.BasicAttack && playerMoves.moveDictionary.TryGetValue(Moves.BasicAttackAir, out var moveToEnable2))
                             {
                                 ManualSingleton<Logging.ILogger>.instance.Info("Enabling move 2: " + moveToEnable2.DevName);
+                                SavegameManager.instance.EnableMove(Moves.BasicAttackAir, true, false);
                                 moveToEnable2.EnableInGame();
                             }
                         }
@@ -73,21 +72,6 @@ namespace YLRandomizer.Data
                     {
                         ManualSingleton<Logging.ILogger>.instance.Warning("Unknown item received: " + itemId);
                     }
-                }
-            };
-            // TODO remove, we synchronize at the beginning so we don't need to track locations
-            // Just extra work for no reason
-            ManualSingleton<IRandomizer>.instance.LocationReceived += (locationId) =>
-            {
-                if (GameState.IsInGame())
-                {
-                    ManualSingleton<Logging.ILogger>.instance.Debug("Location marked as checked: " + locationId);
-                    //var apPagieData = ArchipelagoLocationConverter.GetPagieInfo(locationId);
-                    //var worldPagieData = SavegameManager.instance?.savegame?.worlds?[apPagieData.Item1]?.pagies;
-                    //if (worldPagieData != null)
-                    //{
-                    //    worldPagieData[apPagieData.Item2] = Savegame.CollectionStatus.Collected;
-                    //}
                 }
             };
             ManualSingleton<IRandomizer>.instance.ReadyToUse += () =>
@@ -236,6 +220,7 @@ namespace YLRandomizer.Data
                         if (move == Moves.BasicAttack && playerMoves.moveDictionary.TryGetValue(Moves.BasicAttackAir, out var moveToEnable2))
                         {
                             ManualSingleton<Logging.ILogger>.instance.Info("Enabling move 2: " + moveToEnable2.DevName);
+                            SavegameManager.instance.EnableMove(Moves.BasicAttackAir, true, false);
                             moveToEnable2.EnableInGame();
                         }
                     }

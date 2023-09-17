@@ -386,93 +386,106 @@ namespace YLRandomizer.Randomizer
             }
 
             // Process locations
-            long[] locations;
-            lock (_threadLock)
+            if (LocationReceived != null)
             {
-                locations = _locationReceivedQueue.ToArray();
-                _locationReceivedQueue.Clear();
-            }
-            locations.Do(id => {
-                try
+                long[] locations;
+                lock (_threadLock)
                 {
-                    LocationReceived(id);
+                    locations = _locationReceivedQueue.ToArray();
+                    _locationReceivedQueue.Clear();
                 }
-                catch (Exception e)
-                {
-                    lock (_threadLock)
+                locations.Do(id => {
+                    try
                     {
-                        _messageReceivedQueue.Enqueue($"ERROR: Exception while processing location unlock {id}: {e.Message}");
+                        LocationReceived(id);
                     }
-                    ManualSingleton<ILogger>.instance.Error($"Exception while processing location unlock {id}: {e.Message}");
-                    ManualSingleton<ILogger>.instance.Error(e.StackTrace);
-                }
-            });
+                    catch (Exception e)
+                    {
+                        lock (_threadLock)
+                        {
+                            _messageReceivedQueue.Enqueue($"ERROR: Exception while processing location unlock {id}: {e.Message}");
+                        }
+                        ManualSingleton<ILogger>.instance.Error($"Exception while processing location unlock {id}: {e.Message}");
+                        ManualSingleton<ILogger>.instance.Error(e.StackTrace);
+                    }
+                });
+            }
 
-            // Process items
-            NetworkItem[] items;
-            lock (_threadLock)
+            if (ItemReceived != null)
             {
-                items = _itemReceivedQueue.ToArray();
-                _itemReceivedQueue.Clear();
-            }
-            items.Do(item => {
-                try
+                // Process items
+                NetworkItem[] items;
+                lock (_threadLock)
                 {
-                    ItemReceived(item.Item);
+                    items = _itemReceivedQueue.ToArray();
+                    _itemReceivedQueue.Clear();
                 }
-                catch (Exception e)
-                {
-                    lock (_threadLock)
+                items.Do(item => {
+                    try
                     {
-                        _messageReceivedQueue.Enqueue($"ERROR: Exception while processing item unlock ({item.Item}, {item.Location}, {item.Player}): {e.Message}");
+                        ItemReceived(item.Item);
                     }
-                    ManualSingleton<ILogger>.instance.Error($"Exception while processing item unlock ({item.Item}, {item.Location}, {item.Player}): {e.Message}");
-                    ManualSingleton<ILogger>.instance.Error(e.StackTrace);
-                }
-            });
+                    catch (Exception e)
+                    {
+                        lock (_threadLock)
+                        {
+                            _messageReceivedQueue.Enqueue($"ERROR: Exception while processing item unlock ({item.Item}, {item.Location}, {item.Player}): {e.Message}");
+                        }
+                        ManualSingleton<ILogger>.instance.Error($"Exception while processing item unlock ({item.Item}, {item.Location}, {item.Player}): {e.Message}");
+                        ManualSingleton<ILogger>.instance.Error(e.StackTrace);
+                    }
+                });
+            }
 
-            // Process messages
-            string[] messages;
-            lock (_threadLock)
+            if (MessageReceived != null)
             {
-                messages = _messageReceivedQueue.ToArray();
-                _messageReceivedQueue.Clear();
-            }
-            messages.Do(message =>
-            {
-                try
+                // Process messages
+                string[] messages;
+                lock (_threadLock)
                 {
-                    MessageReceived(message);
+                    messages = _messageReceivedQueue.ToArray();
+                    _messageReceivedQueue.Clear();
                 }
-                catch (Exception e)
+                messages.Do(message =>
                 {
-                    ManualSingleton<ILogger>.instance.Error($"Exception while processing message \"{message}\": {e.Message}");
-                    ManualSingleton<ILogger>.instance.Error(e.StackTrace);
-                }
-            });
-            bool shouldFireReadyToUse = false;
-            lock (_threadLock)
-            {
-                if (!_sentReadyToUse && IsReadyToUse())
-                {
-                    shouldFireReadyToUse = true;
-                    _sentReadyToUse = true;
-                }
-            }
-            if (shouldFireReadyToUse)
-            {
-                try
-                {
-                    ReadyToUse();
-                }
-                catch (Exception e)
-                {
-                    lock (_threadLock)
+                    try
                     {
-                        _messageReceivedQueue.Enqueue($"ERROR: Exception while firing ready to use: {e.Message}");
+                        MessageReceived(message);
                     }
-                    ManualSingleton<ILogger>.instance.Error($"Exception while firing ready to use: {e.Message}");
-                    ManualSingleton<ILogger>.instance.Error(e.StackTrace);
+                    catch (Exception e)
+                    {
+                        ManualSingleton<ILogger>.instance.Error($"Exception while processing message \"{message}\": {e.Message}");
+                        ManualSingleton<ILogger>.instance.Error(e.StackTrace);
+                    }
+                });
+            }
+
+            if (ReadyToUse != null)
+            {
+                bool shouldFireReadyToUse = false;
+                lock (_threadLock)
+                {
+                    if (!_sentReadyToUse && IsReadyToUse())
+                    {
+                        shouldFireReadyToUse = true;
+                        _sentReadyToUse = true;
+                    }
+                }
+                if (shouldFireReadyToUse)
+                {
+                    try
+                    {
+                        ReadyToUse();
+                    }
+                    catch (Exception e)
+                    {
+                        lock (_threadLock)
+                        {
+                            _messageReceivedQueue.Enqueue($"ERROR: Exception while firing ready to use: {e.Message}");
+                        }
+                        ManualSingleton<ILogger>.instance.Error($"Exception while firing ready to use: {e.Message}");
+                        ManualSingleton<ILogger>.instance.Error(e.StackTrace);
+                    }
                 }
             }
         }

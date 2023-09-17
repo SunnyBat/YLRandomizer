@@ -4,6 +4,7 @@ using System.Linq;
 using YLRandomizer.Data;
 using YLRandomizer.Logging;
 using YLRandomizer.Randomizer;
+using static PlayerMoves;
 
 namespace YLRandomizer.Patches
 {
@@ -22,9 +23,10 @@ namespace YLRandomizer.Patches
     public class PlayerMoves_RegisterMove
     {
         [HarmonyPostfix]
-        public static void NeverReplace(PlayerMoves.Move move, PlayerMoves.Moves moveEnum, string devName)
+        public static void NeverReplace(PlayerMoves.Move move, PlayerMoves.Moves moveEnum, string devName, PlayerMoves __instance)
         {
-            var moveItemId = PlayerMoveConverter.GetItemIdFromMove(moveEnum);
+            // EatMk3 is an unknown ability, possibly one that would've been unlocked in Galleon Galaxy but was cut for whatever reason
+            var moveItemId = PlayerMoveConverter.GetItemIdFromMove(moveEnum == Moves.BasicAttackAir ? Moves.BasicAttack : moveEnum); // Tail Twirl item is for both ground and air
             var hasReceivedMove = ManualSingleton<IRandomizer>.instance.GetReceivedAbilities().Any(itemId => itemId == moveItemId);
             SavegameManager.instance.EnableMove(moveEnum, hasReceivedMove, false);
             if (hasReceivedMove)
@@ -51,8 +53,8 @@ namespace YLRandomizer.Patches
             }
             else
             {
-                ManualSingleton<ILogger>.instance.Debug("PlayerMoves_HasLearnedMove: NOT shop item 2: " + moveEnum);
-                Utilities.PrintStack();
+                //ManualSingleton<ILogger>.instance.Debug("PlayerMoves_HasLearnedMove: NOT shop item 2: " + moveEnum);
+                //Utilities.PrintStack();
                 __result = ManualSingleton<IRandomizer>.instance.GetCheckedAbilityLocations().Contains(PlayerMoveConverter.GetLocationIdFromMove(moveEnum));
                 return false;
             }
