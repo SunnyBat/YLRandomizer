@@ -155,7 +155,7 @@ namespace YLRandomizer.Randomizer
                                 LoginResult result;
                                 lock (_sessionLock)
                                 {
-                                    result = _session.TryConnectAndLogin("Yooka Laylee", username, Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, new Version(1, 0, 0), password: password);
+                                    result = _session.TryConnectAndLogin("Yooka-Laylee", username, Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, new Version(1, 0, 0), password: password);
                                 }
                                 if (result.Successful)
                                 {
