@@ -5,10 +5,10 @@
         public const long ID_BASE = 625490000;
         public const long LOCATION_ID_BASE = ID_BASE + 500;
         public const long PAGIES_PER_WORLD = 30; // 5 (10 in Hivory Towers) are ignored, but still need for correct calculations
-        public const long MOLLYCOOL_LOCATION_ID_START = ID_BASE + 20; // 5 total
-        public const long PLAYCOIN_LOCATION_ID_START = ID_BASE + 30; // 5 total
-        public const long HEALTH_EXTENDER_LOCATION_ID_START = ID_BASE; // 6 total
-        public const long ENERGY_EXTENDER_LOCATION_ID_START = ID_BASE + 10; // 6 total
+        public const long MOLLYCOOL_LOCATION_ID_START = ID_BASE + 1020; // 5 total
+        public const long PLAYCOIN_LOCATION_ID_START = ID_BASE + 1030; // 5 total
+        public const long HEALTH_EXTENDER_LOCATION_ID_START = ID_BASE + 1000; // 6 total
+        public const long ENERGY_EXTENDER_LOCATION_ID_START = ID_BASE + 1010; // 6 total
         public const long TROWSER_FREE_ABILITY_LOCATION_ID_START = ID_BASE + 1500;
         public const long TROWSER_PAID_ABILITY_LOCATION_ID_START = ID_BASE + 1510;
         public const long PAGIE_ITEM_ID = ID_BASE;
