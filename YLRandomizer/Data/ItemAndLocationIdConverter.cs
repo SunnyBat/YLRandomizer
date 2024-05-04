@@ -2,7 +2,7 @@
 
 namespace YLRandomizer.Data
 {
-    public class PlayerMoveConverter
+    public class ItemAndLocationIdConverter
     {
         public static PlayerMoves.Moves GetMoveFromDevName(string devName)
         {
@@ -229,6 +229,23 @@ namespace YLRandomizer.Data
                     return PlayerMoves.Moves.Fly;
                 default:
                     return PlayerMoves.Moves.Fly;
+            }
+        }
+
+        public static long GetLocationIdFromEGameStat(EGameStats stat)
+        {
+            switch (stat)
+            {
+                case EGameStats.PagiesCollectedGlacier:
+                    return Constants.TROWSER_FREE_ABILITY_LOCATION_ID_START + 2; // Glide
+                case EGameStats.PagiesCollectedSwamp:
+                    return Constants.TROWSER_FREE_ABILITY_LOCATION_ID_START + 3; // Buddy Bubble
+                case EGameStats.PagiesCollectedCasino:
+                    return Constants.TROWSER_FREE_ABILITY_LOCATION_ID_START + 4; // Camo Cloak
+                case EGameStats.PagiesCollectedSpace:
+                    return Constants.TROWSER_FREE_ABILITY_LOCATION_ID_START + 5; // Flappy Flight
+                default:
+                    return -1;
             }
         }
     }

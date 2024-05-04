@@ -3,9 +3,11 @@ using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.Packets;
 using HarmonyLib;
+using NodeCanvas;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using YLRandomizer.Data;
 using YLRandomizer.Logging;
@@ -345,6 +347,7 @@ namespace YLRandomizer.Randomizer
 
         public void LocationChecked(params long[] locationIds)
         {
+            ManualSingleton<ILogger>.instance.Debug($"ArchipelagoRandomizer.LocationChecked(): {locationIds.Join()}");
             lock (_threadLock)
             {
                 locationIds.Do((id) => _locationSendQueue.Enqueue(id));

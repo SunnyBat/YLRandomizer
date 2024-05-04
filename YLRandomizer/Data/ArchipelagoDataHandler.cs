@@ -50,7 +50,7 @@ namespace YLRandomizer.Data
                     }
                     else if (itemId >= Constants.ABILITY_ITEM_ID_START && itemId <= Constants.ABILITY_ITEM_ID_START + 14)
                     {
-                        var move = PlayerMoveConverter.GetMoveFromItemId(itemId);
+                        var move = ItemAndLocationIdConverter.GetMoveFromItemId(itemId);
                         ManualSingleton<Logging.ILogger>.instance.Info("Move received: " + move);
                         SavegameManager.instance.EnableMove(move, true, false);
                         var playerMoves = UnityEngine.GameObject.FindObjectOfType<PlayerMoves>();
@@ -209,7 +209,7 @@ namespace YLRandomizer.Data
                 for (long i = Constants.ABILITY_ITEM_ID_START; i <= Constants.ABILITY_ITEM_ID_START + 14; i++)
                 {
                     var hasReceivedMove = receivedAbilities.Any(itemId => itemId == i);
-                    var move = PlayerMoveConverter.GetMoveFromItemId(i);
+                    var move = ItemAndLocationIdConverter.GetMoveFromItemId(i);
                     SavegameManager.instance.EnableMove(move, hasReceivedMove, false);
                     if (hasReceivedMove && playerMoves != null && (playerMoves?.moveDictionary?.TryGetValue(move, out var moveToEnable) ?? false))
                     {

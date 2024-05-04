@@ -98,10 +98,11 @@
     <Compile Include="Data\ArchipelagoLocationConverter.cs" />
     <Compile Include="Data\Constants.cs" />
     <Compile Include="Data\IUserMessages.cs" />
-    <Compile Include="Data\PlayerMoveConverter.cs" />
+    <Compile Include="Data\ItemAndLocationIdConverter.cs" />
     <Compile Include="Data\UserMessages.cs" />
     <Compile Include="Data\WorldUnlockCalculator.cs" />
     <Compile Include="GameAnalysis\GameState.cs" />
+    <Compile Include="GameAnalysis\IntermediateActionTracker.cs" />
     <Compile Include="Logging\BepInExLogger.cs" />
     <Compile Include="Patches\LoadingScreenControllerPatches.cs" />
     <Compile Include="Patches\FSMStatePatches.cs" />
