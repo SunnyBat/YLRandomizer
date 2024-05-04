@@ -57,6 +57,10 @@ namespace YLRandomizer.Patches
             EGameStats.Quiz03Completed
         };
 
+        // TODO Unacache this if we disconnect
+        private static int? _cachedRequiredPagieCount = null;
+        private static bool? _cachedQuizConfiguration = null;
+
         [HarmonyPrefix]
         public static bool SometimesReplace(GameStatCondition condition, GameStatManager __instance, ref bool __result)
         {
@@ -68,9 +72,16 @@ namespace YLRandomizer.Patches
             {
                 // Capital B lift elevator to office (final boss area) check
                 ManualSingleton<ILogger>.instance.Debug($"GameStatManager_HasConditionBeenMet.SometimesReplace(): {condition.Stat}, {condition.Value}, {condition.ComparisonOperator})");
-                var requiredPagieCount = ArchipelagoDataHandler.TryGetSlotData(Constants.CONFIGURATION_NAME_CAPITAL_B_PAGIE_COUNT, out long outPagies)
-                    ? outPagies
-                    : Constants.DEFAULT_REQUIRED_PAGIES_FOR_CAPITAL_B;
+                int requiredPagieCount = Constants.DEFAULT_REQUIRED_PAGIES_FOR_CAPITAL_B;
+                if (_cachedRequiredPagieCount != null)
+                {
+                    requiredPagieCount = (int) _cachedRequiredPagieCount;
+                }
+                else if (ArchipelagoDataHandler.TryGetSlotData(Constants.CONFIGURATION_NAME_CAPITAL_B_PAGIE_COUNT, out long outPagies))
+                {
+                    requiredPagieCount = (int) outPagies;
+                    _cachedRequiredPagieCount = requiredPagieCount;
+                }
                 __result = OperationTools.Compare(ManualSingleton<IRandomizer>.instance.GetReceivedPagiesCount(), (int) requiredPagieCount, condition.ComparisonOperator);
                 return false;
             }
@@ -127,13 +138,25 @@ namespace YLRandomizer.Patches
                 __result = _getResultForCondition(condition, hasBeenChecked && hasCollectedPagie);
                 return false;
             }
-            else if (_quizStats.Contains(condition.Stat)
-                && ArchipelagoDataHandler.TryGetSlotData(Constants.CONFIGURATION_NAME_DISABLE_QUIZZES, out bool shouldDisableQuizzes)
-                && shouldDisableQuizzes)
+            else if (_quizStats.Contains(condition.Stat))
             {
-                // Will spam if quiz completed, don't print
-                __result = _getResultForCondition(condition, true);
-                return false;
+                bool shouldDisableQuizzes = false;
+                if (_cachedQuizConfiguration != null)
+                {
+                    shouldDisableQuizzes = (bool) _cachedQuizConfiguration;
+                }
+                else if (ArchipelagoDataHandler.TryGetSlotData(Constants.CONFIGURATION_NAME_DISABLE_QUIZZES, out bool configResult))
+                {
+                    shouldDisableQuizzes = configResult;
+                    _cachedQuizConfiguration = configResult;
+                }
+
+                if (shouldDisableQuizzes)
+                {
+                    // Will spam if quiz completed, don't print
+                    __result = _getResultForCondition(condition, true);
+                    return false;
+                }
             }
             else if (!_statsToNeverPrint.Contains(condition.Stat) && (_statsToAlwaysPrint.Contains(condition.Stat) || callCount < MAX_DYNAMIC_CALL_COUNT))
             {

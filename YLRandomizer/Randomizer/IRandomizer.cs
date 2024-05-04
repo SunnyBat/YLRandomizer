@@ -128,6 +128,12 @@ namespace YLRandomizer.Randomizer
         /// </summary>
         void SetInGame();
         /// <summary>
+        /// Sends a DeathLink event when called. If DeathLink is not enabled for this game,
+        /// this does nothing.
+        /// </summary>
+        /// <param name="message">The message to send with the DeathLink</param>
+        void SendDeathLink(string message);
+        /// <summary>
         /// Run to complete the game.
         /// </summary>
         void SetGameCompleted();
@@ -158,6 +164,12 @@ namespace YLRandomizer.Randomizer
         /// <see cref="IsReadyToUse"/> flipping from false to true.
         /// </summary>
         event Action ReadyToUse;
+        /// <summary>
+        /// Fires when a DeathLink is received. This will never fire if DeathLink is not
+        /// enabled. Thus, it's acceptable to assume this will only fire when all conditions
+        /// for DeathLink have been met, and when this fires a death should be processed.
+        /// </summary>
+        event Action DeathLinkReceived;
         /// <summary>
         /// Handles local item processing. Be sure to call this on the thread you want to use
         /// for receiving items and locations. This is thread-safe for the specific locations

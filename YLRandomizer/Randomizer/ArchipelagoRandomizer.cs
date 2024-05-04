@@ -1,4 +1,5 @@
 ﻿using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.Packets;
@@ -34,6 +35,7 @@ namespace YLRandomizer.Randomizer
         public event LocationReceivedCallback LocationReceived;
         public event MessageReceivedCallback MessageReceived;
         public event Action ReadyToUse;
+        public event Action DeathLinkReceived;
 
         /// <summary>
         /// The time to wait between sending things (eg location checks) to Archipelago.
@@ -52,6 +54,7 @@ namespace YLRandomizer.Randomizer
         private readonly object _sessionLock = new object();
         private int _sequentialConnectionAttempts = 0;
         private ArchipelagoSession _session;
+        private DeathLinkService _deathLink;
         private ArchipelagoClientState _currentGameState = ArchipelagoClientState.ClientUnknown;
         private ArchipelagoClientState _lastSentGameState = ArchipelagoClientState.ClientUnknown;
         private readonly Queue<NetworkItem> _itemReceivedQueue = new Queue<NetworkItem>();
@@ -165,6 +168,23 @@ namespace YLRandomizer.Randomizer
                                     {
                                         _sequentialConnectionAttempts = 0;
                                         _messageReceivedQueue.Enqueue("Connected to Archipelago server!");
+                                    }
+                                    if (GetConfigurationOptions().TryGetValue(Constants.CONFIGURATION_NAME_DEATHLINK, out object isDeathLinkEnabled) && ((bool)isDeathLinkEnabled))
+                                    {
+                                        try
+                                        {
+                                            var deathLinkService = _session.CreateDeathLinkService();
+                                            lock (_threadLock)
+                                            {
+                                                _deathLink = deathLinkService;
+                                                _deathLink.OnDeathLinkReceived += _handleDeathLink;
+                                                _deathLink.EnableDeathLink();
+                                            }
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            _messageReceivedQueue.Enqueue("ERROR: Unable to set up DeathLink: " + e.Message);
+                                        }
                                     }
                                 }
                                 else
@@ -378,6 +398,14 @@ namespace YLRandomizer.Randomizer
             }
         }
 
+        public void SendDeathLink(string message)
+        {
+            lock (_threadLock)
+            {
+                _deathLink.SendDeathLink(new DeathLink(_session.Players.GetPlayerName(_session.ConnectionInfo.Slot), message));
+            }
+        }
+
         public void SetGameCompleted()
         {
             lock (_threadLock)
@@ -544,6 +572,14 @@ namespace YLRandomizer.Randomizer
                         Status = (ArchipelagoClientState)gameStateToSend
                     });
                 }
+            }
+        }
+
+        private void _handleDeathLink(DeathLink deathLink)
+        {
+            if (DeathLinkReceived != null)
+            {
+                DeathLinkReceived();
             }
         }
     }
