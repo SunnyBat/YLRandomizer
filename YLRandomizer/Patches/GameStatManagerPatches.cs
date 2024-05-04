@@ -64,12 +64,14 @@ namespace YLRandomizer.Patches
             // - Once you unlock Glacier, "JungleVisited, 1, GreaterOrEqualTo" gets rapidly evaluated.
             //   No idea what this is for right now. Not sure if/when it stops.
             var callCount = _statCallCounts.GetValueSafe(condition.Stat);
-            if (condition.Stat == EGameStats.PagiesCollected && condition.Value == 100)
+            if (condition.Stat == EGameStats.PagiesCollected && condition.Value == Constants.DEFAULT_REQUIRED_PAGIES_FOR_CAPITAL_B)
             {
-                ManualSingleton<ILogger>.instance.Debug($"GameStatManager_HasConditionBeenMet.SometimesReplace(): {condition.Stat}, {condition.Value}, {condition.ComparisonOperator})");
                 // Capital B lift elevator to office (final boss area) check
-                // TODO Check AP configuration for required pagie count (needs to be implemented)
-                __result = OperationTools.Compare(ManualSingleton<IRandomizer>.instance.GetReceivedPagiesCount(), condition.Value, condition.ComparisonOperator);
+                ManualSingleton<ILogger>.instance.Debug($"GameStatManager_HasConditionBeenMet.SometimesReplace(): {condition.Stat}, {condition.Value}, {condition.ComparisonOperator})");
+                var requiredPagieCount = ArchipelagoDataHandler.TryGetSlotData(Constants.CONFIGURATION_NAME_CAPITAL_B_PAGIE_COUNT, out long outPagies)
+                    ? outPagies
+                    : Constants.DEFAULT_REQUIRED_PAGIES_FOR_CAPITAL_B;
+                __result = OperationTools.Compare(ManualSingleton<IRandomizer>.instance.GetReceivedPagiesCount(), (int) requiredPagieCount, condition.ComparisonOperator);
                 return false;
             }
             else if (_trowzaFreeAbilityStatChecks.Contains(condition.Stat))
@@ -107,35 +109,29 @@ namespace YLRandomizer.Patches
                 // Theoretically Trowzer can immediately teleport if you get a pagie in the relevant world
                 // and then talk to Trowzer, but even if that happens it's going to be more of a quirk of
                 // the randomizer than a real issue, so not addressing it is fine.
-                try
+                var moveId = ItemAndLocationIdConverter.GetLocationIdFromEGameStat(condition.Stat);
+                var hasBeenChecked = ManualSingleton<IRandomizer>.instance.GetAllCheckedLocations().Contains(moveId);
+                if (__result)
                 {
-                    var moveId = ItemAndLocationIdConverter.GetLocationIdFromEGameStat(condition.Stat);
-                    var hasBeenChecked = ManualSingleton<IRandomizer>.instance.GetAllCheckedLocations().Contains(moveId);
-                    if (__result)
-                    {
-                        IntermediateActionTracker.RemoveLocallyCheckedLocation(moveId);
-                    }
-                    else if (IntermediateActionTracker.HasLocationBeenCheckedLocally(moveId))
-                    {
-                        hasBeenChecked = true;
-                    }
-                    var hasCollectedPagie = true;
-                    if (__instance.GameStats.TryGetValue(condition.Stat, out int originalValue))
-                    {
-                        hasCollectedPagie = OperationTools.Compare(originalValue, condition.Value, condition.ComparisonOperator);
-                    }
-                    __result = _getResultForCondition(condition, hasBeenChecked && hasCollectedPagie);
+                    IntermediateActionTracker.RemoveLocallyCheckedLocation(moveId);
                 }
-                catch (Exception e)
+                else if (IntermediateActionTracker.HasLocationBeenCheckedLocally(moveId))
                 {
-                    ManualSingleton<ILogger>.instance.Error($"{e.Message}: {e.InnerException?.Message}");
+                    hasBeenChecked = true;
                 }
+                var hasCollectedPagie = true;
+                if (__instance.GameStats.TryGetValue(condition.Stat, out int originalValue))
+                {
+                    hasCollectedPagie = OperationTools.Compare(originalValue, condition.Value, condition.ComparisonOperator);
+                }
+                __result = _getResultForCondition(condition, hasBeenChecked && hasCollectedPagie);
                 return false;
             }
-            else if (_quizStats.Contains(condition.Stat))
+            else if (_quizStats.Contains(condition.Stat)
+                && ArchipelagoDataHandler.TryGetSlotData(Constants.CONFIGURATION_NAME_DISABLE_QUIZZES, out bool shouldDisableQuizzes)
+                && shouldDisableQuizzes)
             {
                 // Will spam if quiz completed, don't print
-                // TODO Check AP configuration before disabling quizzes (needs to be implemented)
                 __result = _getResultForCondition(condition, true);
                 return false;
             }
@@ -151,6 +147,18 @@ namespace YLRandomizer.Patches
             return true;
         }
 
+        /// <summary>
+        /// Gets the result value for the given condition that lines up with whether the value should be 0 or
+        /// greater than 0. This will return true or false depending on the given condition's ComparisonOperator,
+        /// value, and whether wantToBeGreaterThanZero is true or false.
+        /// For example, if we want the result to be "greather than 0" and the condition is "EqualTo 0", this will
+        /// return false -- since the condition is checking if the value == 0 and we want to say it's greater than
+        /// 0, this returns false to indicate the value is not equal to 0.
+        /// </summary>
+        /// <param name="condition">The condition to parse and return a value based off of</param>
+        /// <param name="wantToBeGreaterThanZero">True if we want the result to indicate that our condition's value
+        ///     is greater than 0, or false to indicate it's less than or equal to 0.</param>
+        /// <returns>True or false depending on the context</returns>
         private static bool _getResultForCondition(GameStatCondition condition, bool wantToBeGreaterThanZero)
         {
             var isCheckingForZero = (condition.ComparisonOperator == CompareMethod.EqualTo && condition.Value == 0)

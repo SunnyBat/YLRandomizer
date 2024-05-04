@@ -2,6 +2,11 @@
 {
     public class Constants
     {
+        /// <summary>
+        /// The default amount of pagies required to beat Capital B. This must be the correct default value for the game,
+        /// otherwise some triggers will not work properly.
+        /// </summary>
+        public const int DEFAULT_REQUIRED_PAGIES_FOR_CAPITAL_B = 100;
         public const long ID_BASE = 625490000;
         public const long LOCATION_ID_BASE = ID_BASE + 500;
         public const long PAGIES_PER_WORLD = 30; // 5 (10 in Hivory Towers) are ignored, but still need for correct calculations
@@ -17,6 +22,9 @@
         public const long MOLLYCOOL_ITEM_ID_START = ID_BASE + 10; // 5 total
         public const long PLAYCOIN_ITEM_ID_START = ID_BASE + 20; // 5 total
         public const long ABILITY_ITEM_ID_START = ID_BASE + 50;
+        public const string CONFIGURATION_NAME_CAPITAL_B_PAGIE_COUNT = "CapitalBPagieCount";
+        public const string CONFIGURATION_NAME_DISABLE_QUIZZES = "DisableQuizzes";
+        public const string CONFIGURATION_NAME_DEATHLINK = "DeathLink";
 
         /// <summary>
         /// The order in which book world indeces (eg excluding Hivory Towers) are ordered in SavegameManager.instance.savegame.worlds.

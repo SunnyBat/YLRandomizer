@@ -235,6 +235,14 @@ namespace YLRandomizer.Randomizer
             }
         }
 
+        public Dictionary<string, object> GetConfigurationOptions()
+        {
+            lock (_threadLock)
+            {
+                return this.IsConfigured() ? this._session.DataStorage.GetSlotData() ?? new Dictionary<string, object>() : new Dictionary<string, object>();
+            }
+        }
+
         public long[] GetAllItems()
         {
             lock (_sessionLock)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace YLRandomizer.Randomizer
 {
@@ -24,6 +25,18 @@ namespace YLRandomizer.Randomizer
         /// </summary>
         /// <returns>True if ready to use, false if not</returns>
         bool IsReadyToUse();
+        /// <summary>
+        /// Returns the configuration options for the randomizer.
+        /// This is not guaranteed to contain any particular key/value pair.
+        /// This is not guaranteed to contain all configuration options used, and may only
+        /// contain a partial set of configuration options used.
+        /// This is not guaranteed to return the same Dictionary object every call.
+        /// This is guaranteed to return a non-null Dictionary object.
+        /// The returned dictionary should not be modified.
+        /// Reasonable defaults should be used if the desired key/value is not present.
+        /// </summary>
+        /// <returns>The configuration options for the randomizer</returns>
+        Dictionary<string, object> GetConfigurationOptions();
         /// <summary>
         /// Gets all items that have been received. This does NOT remove duplicates.
         /// </summary>

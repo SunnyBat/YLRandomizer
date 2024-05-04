@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using YLRandomizer.GameAnalysis;
+using YLRandomizer.Logging;
 using YLRandomizer.Randomizer;
 using static PlayerMoves;
 
@@ -238,6 +240,29 @@ namespace YLRandomizer.Data
                     ManualSingleton<IRandomizer>.instance.SetInGame();
                 }
             }
+        }
+
+        public static bool TryGetSlotData<T>(string key, out T obj)
+        {
+            var dictionaryToRead = ManualSingleton<IRandomizer>.instance.GetConfigurationOptions();
+
+            if (dictionaryToRead != null && dictionaryToRead.TryGetValue(key, out object outVal))
+            {
+                try
+                {
+                    obj = (T)outVal;
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    ManualSingleton<ILogger>.instance.Error(e.Message);
+                    ManualSingleton<ILogger>.instance.Debug("Expected type: " + typeof(T));
+                    ManualSingleton<ILogger>.instance.Debug("Actual type: " + outVal.GetType());
+                }
+            }
+
+            obj = default(T);
+            return false;
         }
     }
 }

@@ -104,6 +104,7 @@
     <Compile Include="GameAnalysis\GameState.cs" />
     <Compile Include="GameAnalysis\IntermediateActionTracker.cs" />
     <Compile Include="Logging\BepInExLogger.cs" />
+    <Compile Include="Patches\ConversationManagerPatches.cs" />
     <Compile Include="Patches\LoadingScreenControllerPatches.cs" />
     <Compile Include="Patches\FSMStatePatches.cs" />
     <Compile Include="Patches\GameStatManagerPatches.cs" />
