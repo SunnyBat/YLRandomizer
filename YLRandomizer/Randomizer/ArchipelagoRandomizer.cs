@@ -50,9 +50,10 @@ namespace YLRandomizer.Randomizer
         private bool _killed = false;
         private bool _sentReadyToUse = false;
         private bool _deathLinkReceived = false;
+        private int _sequentialConnectionAttempts = 0;
+        private Dictionary<string, object> _configurationData;
         private readonly object _threadLock = new object();
         private readonly object _sessionLock = new object();
-        private int _sequentialConnectionAttempts = 0;
         private DateTime _lastDeathLinkInteractionTime = DateTime.MinValue;
         private ArchipelagoSession _session;
         private DeathLinkService _deathLink;
@@ -169,14 +170,15 @@ namespace YLRandomizer.Randomizer
                                     {
                                         _sequentialConnectionAttempts = 0;
                                         _messageReceivedQueue.Enqueue("Connected to Archipelago server!");
+                                        _configurationData = ((LoginSuccessful)result).SlotData;
                                     }
                                     if (GetConfigurationOptions().TryGetValue(Constants.CONFIGURATION_NAME_DEATHLINK, out object isDeathLinkEnabled) && ((bool)isDeathLinkEnabled))
                                     {
                                         try
                                         {
-                                            var deathLinkService = _session.CreateDeathLinkService();
-                                            lock (_threadLock)
+                                            lock (_sessionLock)
                                             {
+                                                var deathLinkService = _session.CreateDeathLinkService();
                                                 _deathLink = deathLinkService;
                                                 _deathLink.OnDeathLinkReceived += (DeathLink deathLink) =>
                                                 {
@@ -185,6 +187,9 @@ namespace YLRandomizer.Randomizer
                                                         _deathLinkReceived = true;
                                                     }
                                                 };
+                                            }
+                                            lock (_sessionLock)
+                                            {
                                                 _deathLink.EnableDeathLink();
                                             }
                                         }
@@ -266,7 +271,7 @@ namespace YLRandomizer.Randomizer
         {
             lock (_threadLock)
             {
-                return this.IsConfigured() ? this._session.DataStorage.GetSlotData() ?? new Dictionary<string, object>() : new Dictionary<string, object>();
+                return this.IsConfigured() && this._configurationData != null ? _configurationData : new Dictionary<string, object>();
             }
         }
 
@@ -407,12 +412,20 @@ namespace YLRandomizer.Randomizer
 
         public void SendDeathLink(string message)
         {
+            DateTime lastDeathLinkTime;
             lock (_threadLock)
             {
-                if (DateTime.Now - _lastDeathLinkInteractionTime > MINIMUM_TIME_BETWEEN_DEATHLINK_INTERACTIONS)
+                lastDeathLinkTime = _lastDeathLinkInteractionTime;
+            }
+            if (DateTime.Now - lastDeathLinkTime > MINIMUM_TIME_BETWEEN_DEATHLINK_INTERACTIONS)
+            {
+                lock (_sessionLock)
                 {
                     _deathLink.SendDeathLink(new DeathLink(_session.Players.GetPlayerName(_session.ConnectionInfo.Slot), message));
                 }
+            }
+            lock (_threadLock)
+            {
                 _lastDeathLinkInteractionTime = DateTime.Now;
             }
         }

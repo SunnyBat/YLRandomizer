@@ -7,7 +7,6 @@ using YLRandomizer.Data;
 using YLRandomizer.GameAnalysis;
 using YLRandomizer.Logging;
 using YLRandomizer.Randomizer;
-using static SavegameBase;
 
 namespace YLRandomizer.Patches
 {
