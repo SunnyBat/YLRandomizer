@@ -4,11 +4,9 @@ using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
 using Archipelago.MultiClient.Net.Packets;
 using HarmonyLib;
-using NodeCanvas;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using YLRandomizer.Data;
 using YLRandomizer.Logging;
@@ -34,8 +32,8 @@ namespace YLRandomizer.Randomizer
         public event ItemReceivedCallback ItemReceived;
         public event LocationReceivedCallback LocationReceived;
         public event MessageReceivedCallback MessageReceived;
+        public event DeathLinkReceivedCallback DeathLinkReceived;
         public event Action ReadyToUse;
-        public event Action DeathLinkReceived;
 
         /// <summary>
         /// The time to wait between sending things (eg location checks) to Archipelago.
@@ -47,12 +45,15 @@ namespace YLRandomizer.Randomizer
         /// </summary>
         private readonly TimeSpan TIME_BETWEEN_AP_CONNECTION_ATTEMPTS = TimeSpan.FromSeconds(5);
         private readonly int MAX_CONNECTION_ATTEMPTS = 3;
+        private readonly TimeSpan MINIMUM_TIME_BETWEEN_DEATHLINK_INTERACTIONS = TimeSpan.FromSeconds(5);
 
         private bool _killed = false;
         private bool _sentReadyToUse = false;
+        private bool _deathLinkReceived = false;
         private readonly object _threadLock = new object();
         private readonly object _sessionLock = new object();
         private int _sequentialConnectionAttempts = 0;
+        private DateTime _lastDeathLinkInteractionTime = DateTime.MinValue;
         private ArchipelagoSession _session;
         private DeathLinkService _deathLink;
         private ArchipelagoClientState _currentGameState = ArchipelagoClientState.ClientUnknown;
@@ -177,7 +178,13 @@ namespace YLRandomizer.Randomizer
                                             lock (_threadLock)
                                             {
                                                 _deathLink = deathLinkService;
-                                                _deathLink.OnDeathLinkReceived += _handleDeathLink;
+                                                _deathLink.OnDeathLinkReceived += (DeathLink deathLink) =>
+                                                {
+                                                    lock (_threadLock)
+                                                    {
+                                                        _deathLinkReceived = true;
+                                                    }
+                                                };
                                                 _deathLink.EnableDeathLink();
                                             }
                                         }
@@ -402,7 +409,11 @@ namespace YLRandomizer.Randomizer
         {
             lock (_threadLock)
             {
-                _deathLink.SendDeathLink(new DeathLink(_session.Players.GetPlayerName(_session.ConnectionInfo.Slot), message));
+                if (DateTime.Now - _lastDeathLinkInteractionTime > MINIMUM_TIME_BETWEEN_DEATHLINK_INTERACTIONS)
+                {
+                    _deathLink.SendDeathLink(new DeathLink(_session.Players.GetPlayerName(_session.ConnectionInfo.Slot), message));
+                }
+                _lastDeathLinkInteractionTime = DateTime.Now;
             }
         }
 
@@ -541,25 +552,24 @@ namespace YLRandomizer.Randomizer
         private void _apTick()
         {
             long[] locationsToSend;
+            ArchipelagoClientState? gameStateToSend = null;
+            bool hasReceivedDeathLink;
             lock (_threadLock)
             {
                 locationsToSend = _locationSendQueue.ToArray();
                 _locationSendQueue.Clear();
+                if (_currentGameState != _lastSentGameState)
+                {
+                    gameStateToSend = _currentGameState;
+                    _lastSentGameState = _currentGameState;
+                }
+                hasReceivedDeathLink = _deathLinkReceived;
             }
             if (locationsToSend.Length > 0)
             {
                 lock (_sessionLock)
                 {
                     _session.Locations.CompleteLocationChecks(locationsToSend);
-                }
-            }
-            ArchipelagoClientState? gameStateToSend = null;
-            lock (_threadLock)
-            {
-                if (_currentGameState != _lastSentGameState)
-                {
-                    gameStateToSend = _currentGameState;
-                    _lastSentGameState = _currentGameState;
                 }
             }
             if (gameStateToSend != null)
@@ -573,13 +583,19 @@ namespace YLRandomizer.Randomizer
                     });
                 }
             }
+            if (hasReceivedDeathLink)
+            {
+                _lastDeathLinkInteractionTime = DateTime.Now;
+                DeathLinkReceived(_clearDeathLinkReceived);
+            }
         }
 
-        private void _handleDeathLink(DeathLink deathLink)
+        private void _clearDeathLinkReceived()
         {
-            if (DeathLinkReceived != null)
+            lock (_threadLock)
             {
-                DeathLinkReceived();
+                _deathLinkReceived = false;
+                _lastDeathLinkInteractionTime = DateTime.Now;
             }
         }
     }

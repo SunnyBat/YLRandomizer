@@ -160,16 +160,16 @@ namespace YLRandomizer.Randomizer
         /// </summary>
         event MessageReceivedCallback MessageReceived;
         /// <summary>
-        /// Fires when the randomizer is ready to play. This corresponds with
-        /// <see cref="IsReadyToUse"/> flipping from false to true.
-        /// </summary>
-        event Action ReadyToUse;
-        /// <summary>
         /// Fires when a DeathLink is received. This will never fire if DeathLink is not
         /// enabled. Thus, it's acceptable to assume this will only fire when all conditions
         /// for DeathLink have been met, and when this fires a death should be processed.
         /// </summary>
-        event Action DeathLinkReceived;
+        event DeathLinkReceivedCallback DeathLinkReceived;
+        /// <summary>
+        /// Fires when the randomizer is ready to play. This corresponds with
+        /// <see cref="IsReadyToUse"/> flipping from false to true.
+        /// </summary>
+        event Action ReadyToUse;
         /// <summary>
         /// Handles local item processing. Be sure to call this on the thread you want to use
         /// for receiving items and locations. This is thread-safe for the specific locations
@@ -200,4 +200,11 @@ namespace YLRandomizer.Randomizer
     /// </summary>
     /// <param name="message"></param>
     public delegate void MessageReceivedCallback(string message);
+    /// <summary>
+    /// A callback for receiving DeathLinks. The given Action must be called
+    /// in order to clear the DeathLink. This callback will be called
+    /// periodically until the Action is called.
+    /// </summary>
+    /// <param name="clearDeathLink">Call when the DeathLink has been properly consumed/</param>
+    public delegate void DeathLinkReceivedCallback(Action clearDeathLink);
 }

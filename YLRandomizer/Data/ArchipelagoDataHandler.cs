@@ -78,6 +78,15 @@ namespace YLRandomizer.Data
             {
                 UpdateCurrentGameStateToAP();
             };
+            ManualSingleton<IRandomizer>.instance.DeathLinkReceived += (Action clearDeathLink) =>
+            {
+                var playerHealth = UnityEngine.GameObject.FindObjectOfType<PlayerHealth>();
+                if (!playerHealth.Invulnerable)
+                {
+                    clearDeathLink();
+                    playerHealth.SubtractHealth(playerHealth.CurrentHealth, true);
+                }
+            };
         }
 
         public static void UpdateCurrentGameStateToAP(bool forceLoad = false)

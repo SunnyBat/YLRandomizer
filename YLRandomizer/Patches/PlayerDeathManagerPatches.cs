@@ -18,6 +18,7 @@ namespace YLRandomizer.Patches
             if (DateTime.Now - _lastTimeSent > MinTimeBetweenDeathLinks)
             {
                 ManualSingleton<IRandomizer>.instance.SendDeathLink("Dropped to zero health");
+                _lastTimeSent = DateTime.Now;
             }
             else
             {
