@@ -81,10 +81,10 @@ namespace YLRandomizer.Data
             ManualSingleton<IRandomizer>.instance.DeathLinkReceived += (Action clearDeathLink) =>
             {
                 var playerHealth = UnityEngine.GameObject.FindObjectOfType<PlayerHealth>();
-                if (!playerHealth.Invulnerable)
+                playerHealth.SubtractHealth(playerHealth.CurrentHealth, true);
+                if (playerHealth.CurrentHealth <= 0)
                 {
                     clearDeathLink();
-                    playerHealth.SubtractHealth(playerHealth.CurrentHealth, true);
                 }
             };
         }

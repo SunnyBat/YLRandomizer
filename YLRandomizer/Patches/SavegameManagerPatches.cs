@@ -18,6 +18,19 @@ namespace YLRandomizer.Patches
         }
     }
 
+    // Not overriding right now since the main use case for this is PauseTotalsScreenController, which we're patching already
+    //[HarmonyPatch(typeof(SavegameManager), nameof(SavegameManager.GetAllPagieCount))]
+    //public class SavegameManager_GetAllPagieCount
+    //{
+    //    [HarmonyPrefix]
+    //    public static bool AlwaysReplace(ref int __result)
+    //    {
+    //        ManualSingleton<ILogger>.instance.Debug($"SavegameManager_GetAllPagieCount.AlwaysReplace()");
+    //        __result = ManualSingleton<IRandomizer>.instance?.GetReceivedPagiesCount() ?? 0;
+    //        return false;
+    //    }
+    //}
+
     [HarmonyPatch(typeof(SavegameManager), nameof(SavegameManager.CollectArcadeToken))]
     public class SavegameManager_CollectArcadeToken
     {
