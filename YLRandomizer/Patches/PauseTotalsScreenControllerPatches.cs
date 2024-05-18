@@ -10,6 +10,7 @@ namespace YLRandomizer.Patches
     [HarmonyPatch(typeof(PauseTotalsScreenController), "FillElements")]
     public class PauseTotalsScreenController_FillElements
     {
+        private const string QUAD_CAPITAL_B_FORMATTABLE = "{0}/{1}/{2} ({3})";
         private const string TRIPLE_TOTAL_LABELLED = "RCV/SND/T";
         private const string TRIPLE_TOTAL_FORMATTABLE = "{0}/{1}/{2}";
         [HarmonyPostfix]
@@ -29,6 +30,7 @@ namespace YLRandomizer.Patches
             {
                 ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): Updating Totals window");
                 CollectiblesInfo collectiblesInfo = (!(SavegameManager.instance != null)) ? new CollectiblesInfo() : SavegameManager.instance.collectiblesTotals;
+                string requiredCapitalBPagies = ArchipelagoDataHandler.TryGetSlotData(Constants.CONFIGURATION_NAME_CAPITAL_B_PAGIE_COUNT, out long outPagies) ? outPagies.ToString() : "?";
                 int pagieReceiveCount = ManualSingleton<IRandomizer>.instance?.GetReceivedPagiesCount() ?? 0;
                 int pagieSentCount = SavegameManager.instance.GetAllPagieCount();
                 int healthExtenderReceiveCount = ManualSingleton<IRandomizer>.instance?.GetReceivedHealthExtenderCount() ?? 0;
@@ -40,7 +42,7 @@ namespace YLRandomizer.Patches
                 int mollycoolReceiveCount = ManualSingleton<IRandomizer>.instance?.GetReceivedMollycools().Count(val => val) ?? 0;
                 int mollycoolSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.TransformationTokensCollected);
                 __instance.m_quillText.text = TRIPLE_TOTAL_LABELLED; // Probably can't localize this :(
-                __instance.m_pagieText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, pagieReceiveCount, pagieSentCount, collectiblesInfo.pagieMaximum);
+                __instance.m_pagieText.text = string.Format(QUAD_CAPITAL_B_FORMATTABLE, pagieReceiveCount, pagieSentCount, collectiblesInfo.pagieMaximum, requiredCapitalBPagies);
                 __instance.m_healthExtenderText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, healthExtenderReceiveCount, healthExtenderSentCount, collectiblesInfo.healthExtenderMaximum);
                 __instance.m_energyExtenderText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, energyExtenderReceiveCount, energyExtenderSentCount, collectiblesInfo.energyExtenderMaximum);
                 __instance.m_arcadeTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, playCoinReceiveCount, playCoinSentCount, collectiblesInfo.arcadeTokenMaximum);
