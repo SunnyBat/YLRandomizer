@@ -45,8 +45,8 @@ namespace YLRandomizer.Patches
                 __instance.m_pagieText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, pagieReceiveCount, pagieSentCount, collectiblesInfo.pagieMaximum);
                 __instance.m_healthExtenderText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, healthExtenderReceiveCount, healthExtenderSentCount, collectiblesInfo.healthExtenderMaximum);
                 __instance.m_energyExtenderText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, energyExtenderReceiveCount, energyExtenderSentCount, collectiblesInfo.energyExtenderMaximum);
-                __instance.m_arcadeTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, playCoinReceiveCount, playCoinSentCount, collectiblesInfo.energyExtenderMaximum);
-                __instance.m_transformationTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, mollycoolReceiveCount, mollycoolSentCount, collectiblesInfo.energyExtenderMaximum);
+                __instance.m_arcadeTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, playCoinReceiveCount, playCoinSentCount, collectiblesInfo.arcadeTokenMaximum);
+                __instance.m_transformationTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, mollycoolReceiveCount, mollycoolSentCount, collectiblesInfo.transformationTokenMaximum);
             }
             else
             {
@@ -70,39 +70,29 @@ namespace YLRandomizer.Patches
                     __instance.m_pagieText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, pagieSentCount, worldData.pagieMaximum);
                     __instance.m_healthExtenderText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, healthExtenderSentCount, worldData.healthExtenderMaximum);
                     __instance.m_energyExtenderText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, energyExtenderSentCount, worldData.energyExtenderMaximum);
-                    __instance.m_arcadeTokenText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, "-", worldData.energyExtenderMaximum);
-                    __instance.m_transformationTokenText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, "-", worldData.energyExtenderMaximum);
+                    __instance.m_arcadeTokenText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, "-", worldData.arcadeTokenMaximum);
+                    __instance.m_transformationTokenText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, "-", worldData.transformationTokenMaximum);
                 }
                 else
                 {
                     string worldName = ((EWorlds)m_currentWorldTotalsBeingShown).ToString();
-                    ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T1");
                     int pagieSentCount = SavegameManager.instance.savegame.worlds[m_currentWorldTotalsBeingShown].pagieCount;
-                    ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T2");
-                    var playCoinIndex = worldIndex - 1;
-                    ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T2-1");
+                    var playCoinIndex = Constants.WorldIndexToLogicalIndexTranslations[worldIndex] - 1;
                     var receivedPlayCoins = ManualSingleton<IRandomizer>.instance.GetReceivedPlayCoins();
-                    ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T2-1-1");
                     int playCoinReceiveCount = playCoinIndex >= 0 ? receivedPlayCoins[playCoinIndex] ? 1 : 0 : 0;
-                    ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T2-1-2");
                     int playCoinSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.ArcadeTokensCollected.ToString() + worldName);
-                    ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T2-1-3");
-                    var mollycoolIndex = worldIndex - 1;
-                    ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T2-2");
+                    var mollycoolIndex = Constants.WorldIndexToLogicalIndexTranslations[worldIndex] - 1;
                     var receivedMollycools = ManualSingleton<IRandomizer>.instance.GetReceivedMollycools();
                     int mollycoolReceiveCount = mollycoolIndex >= 0 ? receivedMollycools[mollycoolIndex] ? 1 : 0 : 0;
-                    ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T2-3");
                     int mollycoolSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.TransformationTokensCollected.ToString() + worldName);
                     int healthExtenderSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.HealthExtendersCollected.ToString() + worldName);
                     int energyExtenderSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.EnergyExtendersCollected.ToString() + worldName);
-                    ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T3");
                     __instance.m_quillText.text = TRIPLE_TOTAL_LABELLED; // Probably can't localize this :(
                     __instance.m_pagieText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, "-", pagieSentCount, worldData.pagieMaximum);
                     __instance.m_healthExtenderText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, "-", healthExtenderSentCount, worldData.healthExtenderMaximum);
                     __instance.m_energyExtenderText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, "-", energyExtenderSentCount, worldData.energyExtenderMaximum);
-                    __instance.m_arcadeTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, playCoinReceiveCount, playCoinSentCount, worldData.energyExtenderMaximum);
-                    __instance.m_transformationTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, mollycoolReceiveCount, mollycoolSentCount, worldData.energyExtenderMaximum);
-                    ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T4");
+                    __instance.m_arcadeTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, playCoinReceiveCount, playCoinSentCount, worldData.arcadeTokenMaximum);
+                    __instance.m_transformationTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, mollycoolReceiveCount, mollycoolSentCount, worldData.transformationTokenMaximum);
                 }
             }
         }
