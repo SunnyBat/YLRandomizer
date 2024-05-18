@@ -16,7 +16,9 @@ namespace YLRandomizer.Patches
         [HarmonyPrefix]
         public static bool AlwaysReplace(PlayerMoves.Moves moveEnum, bool boughtFromTrowzer)
         {
-            ManualSingleton<IRandomizer>.instance.LocationChecked(ItemAndLocationIdConverter.GetLocationIdFromMove(moveEnum));
+            var locationId = ItemAndLocationIdConverter.GetLocationIdFromMove(moveEnum);
+            ManualSingleton<IRandomizer>.instance.LocationChecked(locationId);
+            IntermediateActionTracker.AddLocallyCheckedLocation(locationId);
             return false;
         }
     }
