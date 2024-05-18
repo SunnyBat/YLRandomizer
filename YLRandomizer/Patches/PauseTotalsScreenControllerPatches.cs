@@ -10,8 +10,6 @@ namespace YLRandomizer.Patches
     [HarmonyPatch(typeof(PauseTotalsScreenController), "FillElements")]
     public class PauseTotalsScreenController_FillElements
     {
-        private const string DOUBLE_TOTAL_LABELLED = "SENT/TOTAL";
-        private const string DOUBLE_TOTAL_FORMATTABLE = "{0}/{1}";
         private const string TRIPLE_TOTAL_LABELLED = "RCV/SND/T";
         private const string TRIPLE_TOTAL_FORMATTABLE = "{0}/{1}/{2}";
         [HarmonyPostfix]
@@ -51,49 +49,29 @@ namespace YLRandomizer.Patches
             else
             {
                 ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): Updating World {m_currentWorldTotalsBeingShown} window");
-                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T1");
                 var m_worldSetupLookup = (int[])typeof(PauseTotalsScreenController)
                     .GetField("m_worldSetupLookup", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                     .GetValue(__instance);
-                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T2");
                 int worldIndex = m_worldSetupLookup[m_currentWorldTotalsBeingShown - 1];
-                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T3");
                 WorldData worldData = __instance.m_worldSetup.worlds[worldIndex];
-                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T4");
-                if (m_currentWorldTotalsBeingShown == 1) // Hivory Towers
-                {
-                    string worldName = ((EWorlds)m_currentWorldTotalsBeingShown).ToString();
-                    int pagieSentCount = SavegameManager.instance.savegame.worlds[m_currentWorldTotalsBeingShown].pagieCount;
-                    int healthExtenderSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.HealthExtendersCollected.ToString() + worldName);
-                    int energyExtenderSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.EnergyExtendersCollected.ToString() + worldName);
-                    __instance.m_quillText.text = DOUBLE_TOTAL_LABELLED; // Probably can't localize this :(
-                    __instance.m_pagieText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, pagieSentCount, worldData.pagieMaximum);
-                    __instance.m_healthExtenderText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, healthExtenderSentCount, worldData.healthExtenderMaximum);
-                    __instance.m_energyExtenderText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, energyExtenderSentCount, worldData.energyExtenderMaximum);
-                    __instance.m_arcadeTokenText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, "-", worldData.arcadeTokenMaximum);
-                    __instance.m_transformationTokenText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, "-", worldData.transformationTokenMaximum);
-                }
-                else
-                {
-                    string worldName = ((EWorlds)m_currentWorldTotalsBeingShown).ToString();
-                    int pagieSentCount = SavegameManager.instance.savegame.worlds[m_currentWorldTotalsBeingShown].pagieCount;
-                    var playCoinIndex = Constants.WorldIndexToLogicalIndexTranslations[worldIndex] - 1;
-                    var receivedPlayCoins = ManualSingleton<IRandomizer>.instance.GetReceivedPlayCoins();
-                    int playCoinReceiveCount = playCoinIndex >= 0 ? receivedPlayCoins[playCoinIndex] ? 1 : 0 : 0;
-                    int playCoinSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.ArcadeTokensCollected.ToString() + worldName);
-                    var mollycoolIndex = Constants.WorldIndexToLogicalIndexTranslations[worldIndex] - 1;
-                    var receivedMollycools = ManualSingleton<IRandomizer>.instance.GetReceivedMollycools();
-                    int mollycoolReceiveCount = mollycoolIndex >= 0 ? receivedMollycools[mollycoolIndex] ? 1 : 0 : 0;
-                    int mollycoolSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.TransformationTokensCollected.ToString() + worldName);
-                    int healthExtenderSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.HealthExtendersCollected.ToString() + worldName);
-                    int energyExtenderSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.EnergyExtendersCollected.ToString() + worldName);
-                    __instance.m_quillText.text = TRIPLE_TOTAL_LABELLED; // Probably can't localize this :(
-                    __instance.m_pagieText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, "-", pagieSentCount, worldData.pagieMaximum);
-                    __instance.m_healthExtenderText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, "-", healthExtenderSentCount, worldData.healthExtenderMaximum);
-                    __instance.m_energyExtenderText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, "-", energyExtenderSentCount, worldData.energyExtenderMaximum);
-                    __instance.m_arcadeTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, playCoinReceiveCount, playCoinSentCount, worldData.arcadeTokenMaximum);
-                    __instance.m_transformationTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, mollycoolReceiveCount, mollycoolSentCount, worldData.transformationTokenMaximum);
-                }
+                string worldName = ((EWorlds)m_currentWorldTotalsBeingShown).ToString();
+                int pagieSentCount = SavegameManager.instance.savegame.worlds[m_currentWorldTotalsBeingShown].pagieCount;
+                var playCoinIndex = Constants.WorldIndexToLogicalIndexTranslations[worldIndex] - 1;
+                var receivedPlayCoins = ManualSingleton<IRandomizer>.instance.GetReceivedPlayCoins();
+                int playCoinReceiveCount = playCoinIndex >= 0 ? receivedPlayCoins[playCoinIndex] ? 1 : 0 : 0;
+                int playCoinSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.ArcadeTokensCollected.ToString() + worldName);
+                var mollycoolIndex = Constants.WorldIndexToLogicalIndexTranslations[worldIndex] - 1;
+                var receivedMollycools = ManualSingleton<IRandomizer>.instance.GetReceivedMollycools();
+                int mollycoolReceiveCount = mollycoolIndex >= 0 ? receivedMollycools[mollycoolIndex] ? 1 : 0 : 0;
+                int mollycoolSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.TransformationTokensCollected.ToString() + worldName);
+                int healthExtenderSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.HealthExtendersCollected.ToString() + worldName);
+                int energyExtenderSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.EnergyExtendersCollected.ToString() + worldName);
+                __instance.m_quillText.text = TRIPLE_TOTAL_LABELLED; // Probably can't localize this :(
+                __instance.m_pagieText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, "-", pagieSentCount, worldData.pagieMaximum);
+                __instance.m_healthExtenderText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, "-", healthExtenderSentCount, worldData.healthExtenderMaximum);
+                __instance.m_energyExtenderText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, "-", energyExtenderSentCount, worldData.energyExtenderMaximum);
+                __instance.m_arcadeTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, playCoinReceiveCount, playCoinSentCount, worldData.arcadeTokenMaximum);
+                __instance.m_transformationTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, mollycoolReceiveCount, mollycoolSentCount, worldData.transformationTokenMaximum);
             }
         }
     }
