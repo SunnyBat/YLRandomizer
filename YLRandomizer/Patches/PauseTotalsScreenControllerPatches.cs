@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using System;
 using System.Collections;
 using System.Linq;
 using YLRandomizer.Data;
@@ -16,19 +17,18 @@ namespace YLRandomizer.Patches
         [HarmonyPostfix]
         public static IEnumerator Postfix(IEnumerator result, PauseTotalsScreenController __instance)
         {
-            ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace()");
+            ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.Postfix()");
             while (result?.MoveNext() ?? false)
             {
                 yield return result.Current;
             }
-            ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): Done waiting");
+            ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.Postfix(): Done waiting");
             var m_currentWorldTotalsBeingShown = (int) typeof(PauseTotalsScreenController)
                 .GetField("m_currentWorldTotalsBeingShown", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                 .GetValue(__instance);
-            //var conversationGameUtility = (ConversationGameUtility)typeof(PauseTotalsScreenController).GetField("m_conversationGameUtility").GetValue(__instance);
             if (m_currentWorldTotalsBeingShown == 0) // Totals window
             {
-                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): Updating Totals window");
+                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.Postfix(): Updating Totals window");
                 CollectiblesInfo collectiblesInfo = (!(SavegameManager.instance != null)) ? new CollectiblesInfo() : SavegameManager.instance.collectiblesTotals;
                 string requiredCapitalBPagies = ArchipelagoDataHandler.TryGetSlotData(Constants.CONFIGURATION_NAME_CAPITAL_B_PAGIE_COUNT, out long outPagies) ? outPagies.ToString() : "?";
                 int pagieReceiveCount = ManualSingleton<IRandomizer>.instance?.GetReceivedPagiesCount() ?? 0;
@@ -50,7 +50,7 @@ namespace YLRandomizer.Patches
             }
             else
             {
-                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): Updating World {m_currentWorldTotalsBeingShown} window");
+                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.Postfix(): Updating World {m_currentWorldTotalsBeingShown} window");
                 var m_worldSetupLookup = (int[])typeof(PauseTotalsScreenController)
                     .GetField("m_worldSetupLookup", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                     .GetValue(__instance);
@@ -74,6 +74,32 @@ namespace YLRandomizer.Patches
                 __instance.m_energyExtenderText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, "-", energyExtenderSentCount, worldData.energyExtenderMaximum);
                 __instance.m_arcadeTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, playCoinReceiveCount, playCoinSentCount, worldData.arcadeTokenMaximum);
                 __instance.m_transformationTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, mollycoolReceiveCount, mollycoolSentCount, worldData.transformationTokenMaximum);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(PauseTotalsScreenController), "Show", new Type[] { typeof(bool) })]
+    public class PauseTotalsScreenController_Show
+    {
+        [HarmonyPostfix]
+        public static void Postfix(PauseTotalsScreenController __instance)
+        {
+            try
+            {
+                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_Show.Postfix(): Updating unlocked world index");
+                var m_worldSetupLookup = (int[])typeof(PauseTotalsScreenController)
+                    .GetField("m_worldSetupLookup", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    .GetValue(__instance);
+                if (m_worldSetupLookup != null)
+                {
+                    typeof(PauseTotalsScreenController)
+                        .GetField("m_lastUnlockedWorldIndex", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                        .SetValue(__instance, m_worldSetupLookup.Length);
+                }
+            }
+            catch (Exception e)
+            {
+                ManualSingleton<ILogger>.instance.Warning($"PauseTotalsScreenController_Show.Postfix(): Error updating unlocked world index: " + e.Message);
             }
         }
     }

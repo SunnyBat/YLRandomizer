@@ -81,7 +81,7 @@ namespace YLRandomizer.Patches
                     requiredPagieCount = (int) outPagies;
                     _cachedRequiredPagieCount = requiredPagieCount;
                 }
-                __result = OperationTools.Compare(ManualSingleton<IRandomizer>.instance.GetReceivedPagiesCount(), (int) requiredPagieCount, condition.ComparisonOperator);
+                __result = OperationTools.Compare(ManualSingleton<IRandomizer>.instance.GetReceivedPagiesCount(), requiredPagieCount, condition.ComparisonOperator);
                 return false;
             }
             else if (_trowzaFreeAbilityStatChecks.Contains(condition.Stat))
