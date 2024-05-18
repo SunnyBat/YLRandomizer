@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System.Collections;
 using System.Linq;
+using YLRandomizer.Data;
 using YLRandomizer.Logging;
 using YLRandomizer.Randomizer;
 
@@ -9,6 +10,8 @@ namespace YLRandomizer.Patches
     [HarmonyPatch(typeof(PauseTotalsScreenController), "FillElements")]
     public class PauseTotalsScreenController_FillElements
     {
+        private const string DOUBLE_TOTAL_LABELLED = "SENT/TOTAL";
+        private const string DOUBLE_TOTAL_FORMATTABLE = "{0}/{1}";
         private const string TRIPLE_TOTAL_LABELLED = "RCV/SND/T";
         private const string TRIPLE_TOTAL_FORMATTABLE = "{0}/{1}/{2}";
         [HarmonyPostfix]
@@ -44,6 +47,58 @@ namespace YLRandomizer.Patches
                 __instance.m_energyExtenderText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, energyExtenderReceiveCount, energyExtenderSentCount, collectiblesInfo.energyExtenderMaximum);
                 __instance.m_arcadeTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, playCoinReceiveCount, playCoinSentCount, collectiblesInfo.energyExtenderMaximum);
                 __instance.m_transformationTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, mollycoolReceiveCount, mollycoolSentCount, collectiblesInfo.energyExtenderMaximum);
+            }
+            else if (m_currentWorldTotalsBeingShown == 1) // Hivory Towers
+            {
+                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): Updating World {m_currentWorldTotalsBeingShown} window");
+                CollectiblesInfo collectiblesInfo = (!(SavegameManager.instance != null)) ? new CollectiblesInfo() : SavegameManager.instance.collectiblesTotals;
+                string worldName = ((EWorlds)m_currentWorldTotalsBeingShown).ToString();
+                int pagieSentCount = SavegameManager.instance.savegame.worlds[m_currentWorldTotalsBeingShown].pagieCount;
+                int healthExtenderSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.HealthExtendersCollected.ToString() + worldName);
+                int energyExtenderSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.EnergyExtendersCollected.ToString() + worldName);
+                __instance.m_quillText.text = DOUBLE_TOTAL_LABELLED; // Probably can't localize this :(
+                __instance.m_pagieText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, pagieSentCount, collectiblesInfo.pagieMaximum);
+                __instance.m_healthExtenderText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, healthExtenderSentCount, collectiblesInfo.healthExtenderMaximum);
+                __instance.m_energyExtenderText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, energyExtenderSentCount, collectiblesInfo.energyExtenderMaximum);
+                __instance.m_arcadeTokenText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, "-", collectiblesInfo.energyExtenderMaximum);
+                __instance.m_transformationTokenText.text = string.Format(DOUBLE_TOTAL_FORMATTABLE, "-", collectiblesInfo.energyExtenderMaximum);
+            }
+            else
+            {
+                int worldIndex = Constants.WorldIndexToLogicalIndexTranslations[m_currentWorldTotalsBeingShown];
+                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): Updating World {m_currentWorldTotalsBeingShown} window");
+                var m_worldSetup = (WorldSetup)typeof(PauseTotalsScreenController)
+                    .GetField("m_worldSetup", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    .GetValue(__instance);
+                WorldData worldData = m_worldSetup.worlds[worldIndex];
+                string worldName = ((EWorlds)m_currentWorldTotalsBeingShown).ToString();
+                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T1");
+                int pagieSentCount = SavegameManager.instance.savegame.worlds[m_currentWorldTotalsBeingShown].pagieCount;
+                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T2");
+                var playCoinIndex = worldIndex - 1;
+                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T2-1");
+                var receivedPlayCoins = ManualSingleton<IRandomizer>.instance.GetReceivedPlayCoins();
+                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T2-1-1");
+                int playCoinReceiveCount = playCoinIndex >= 0 ? receivedPlayCoins[playCoinIndex] ? 1 : 0 : 0;
+                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T2-1-2");
+                int playCoinSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.ArcadeTokensCollected.ToString() + worldName);
+                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T2-1-3");
+                var mollycoolIndex = worldIndex - 1;
+                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T2-2");
+                var receivedMollycools = ManualSingleton<IRandomizer>.instance.GetReceivedMollycools();
+                int mollycoolReceiveCount = mollycoolIndex >= 0 ? receivedMollycools[mollycoolIndex] ? 1 : 0 : 0;
+                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T2-3");
+                int mollycoolSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.TransformationTokensCollected.ToString() + worldName);
+                int healthExtenderSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.HealthExtendersCollected.ToString() + worldName);
+                int energyExtenderSentCount = GameStatManager.instance.GetCurrentValue(EGameStats.EnergyExtendersCollected.ToString() + worldName);
+                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T3");
+                __instance.m_quillText.text = TRIPLE_TOTAL_LABELLED; // Probably can't localize this :(
+                __instance.m_pagieText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, "-", pagieSentCount, worldData.pagieMaximum);
+                __instance.m_healthExtenderText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, "-", healthExtenderSentCount, worldData.healthExtenderMaximum);
+                __instance.m_energyExtenderText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, "-", energyExtenderSentCount, worldData.energyExtenderMaximum);
+                __instance.m_arcadeTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, playCoinReceiveCount, playCoinSentCount, worldData.energyExtenderMaximum);
+                __instance.m_transformationTokenText.text = string.Format(TRIPLE_TOTAL_FORMATTABLE, mollycoolReceiveCount, mollycoolSentCount, worldData.energyExtenderMaximum);
+                ManualSingleton<ILogger>.instance.Debug($"PauseTotalsScreenController_FillElements.SometimesReplace(): T4");
             }
         }
     }
