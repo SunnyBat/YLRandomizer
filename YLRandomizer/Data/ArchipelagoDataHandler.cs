@@ -80,11 +80,14 @@ namespace YLRandomizer.Data
             };
             ManualSingleton<IRandomizer>.instance.DeathLinkReceived += (Action clearDeathLink) =>
             {
-                var playerHealth = UnityEngine.GameObject.FindObjectOfType<PlayerHealth>();
-                playerHealth.SubtractHealth(playerHealth.CurrentHealth, true);
-                if (playerHealth.CurrentHealth <= 0)
+                if (GameState.HasFullControlOfCharacter())
                 {
-                    clearDeathLink();
+                    var playerHealth = UnityEngine.GameObject.FindObjectOfType<PlayerHealth>();
+                    playerHealth.SubtractHealth(playerHealth.CurrentHealth, true);
+                    if (playerHealth.CurrentHealth <= 0)
+                    {
+                        clearDeathLink();
+                    }
                 }
             };
         }
