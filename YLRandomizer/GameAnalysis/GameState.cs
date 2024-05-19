@@ -55,11 +55,21 @@ namespace YLRandomizer.GameAnalysis
         }
 
         /// <summary>
+        /// Checks to see if the player has full control of the character in
+        /// any way (eg main game, arcade game, etc)
+        /// </summary>
+        /// <returns></returns>
+        public static bool HasFullControlOfCharacter()
+        {
+            return HasFullControlOfMainGameCharacter() || HasFullControlOfArcadeCharacter();
+        }
+
+        /// <summary>
         /// This attempts to check to make sure the player has full control, eg can walk around,
         /// attack, etc.
         /// </summary>
         /// <returns></returns>
-        public static bool HasFullControlOfCharacter()
+        public static bool HasFullControlOfMainGameCharacter()
         {
             if (!IsInGame() || PauseController.instance.IsPaused)
             {
@@ -81,6 +91,21 @@ namespace YLRandomizer.GameAnalysis
             return (_cameraManager?.IsPlayerCamera(_cameraManager?.GetCurrentCamera()) ?? false)
                 && (_playerLogic?.IsMovementEnabled() ?? false)
                 && (!_hudSilhouetteController?.IsAnimating() ?? true);
+        }
+
+        /// <summary>
+        /// This attempts to check to make sure the player has full control within a Rextro's
+        /// Arcade game.
+        /// </summary>
+        /// <returns></returns>
+        public static bool HasFullControlOfArcadeCharacter()
+        {
+            if (!IsInGame() || PauseController.instance.IsPaused)
+            {
+                return false;
+            }
+
+            return ArcadeGameController.Instance?.CurrentGameState == ArcadeGameController.ArcadeGameState.InPlay;
         }
     }
 }

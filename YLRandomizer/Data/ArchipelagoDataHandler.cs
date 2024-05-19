@@ -80,7 +80,7 @@ namespace YLRandomizer.Data
             };
             ManualSingleton<IRandomizer>.instance.DeathLinkReceived += (Action clearDeathLink) =>
             {
-                if (GameState.HasFullControlOfCharacter())
+                if (GameState.HasFullControlOfMainGameCharacter())
                 {
                     var playerHealth = UnityEngine.GameObject.FindObjectOfType<PlayerHealth>();
                     playerHealth.SubtractHealth(playerHealth.CurrentHealth, true);
@@ -88,6 +88,11 @@ namespace YLRandomizer.Data
                     {
                         clearDeathLink();
                     }
+                }
+                else if (GameState.HasFullControlOfArcadeCharacter())
+                {
+                    ArcadeGameController.Instance?.GoToGameState(ArcadeGameController.ArcadeGameState.Ending);
+                    clearDeathLink();
                 }
             };
         }
