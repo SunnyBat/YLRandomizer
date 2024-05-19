@@ -113,6 +113,8 @@
     <Compile Include="Patches\FrontendSavegameScreenControllerPatch.cs" />
     <Compile Include="Patches\PlayerDeathManagerPatches.cs" />
     <Compile Include="Patches\PauseTotalsScreenControllerPatches.cs" />
+    <Compile Include="Patches\PlayerStateFallHitGroundPatches.cs" />
+    <Compile Include="Patches\PlayerStateSwimUnderwaterDiePatches.cs" />
     <Compile Include="Patches\TrowzaInterfacePatches.cs" />
     <Compile Include="Patches\SetCutscenePatches.cs" />
     <Compile Include="Patches\ShowConversationPatches.cs" />
