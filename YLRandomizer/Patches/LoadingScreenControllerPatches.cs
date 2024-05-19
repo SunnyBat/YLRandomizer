@@ -4,6 +4,17 @@ using YLRandomizer.Logging;
 
 namespace YLRandomizer.Patches
 {
+    [HarmonyPatch(typeof(LoadingScreenController), nameof(LoadingScreenController.LoadScene))]
+    public class LoadingScreenController_LoadScene
+    {
+        [HarmonyPrefix]
+        public static void NeverReplace(string sceneName, string playerStartTransform, string playerEnterFSM, bool saveGame, LoadingScreenFade fadeMask, bool unpauseGame)
+        {
+            ManualSingleton<ILogger>.instance.Debug($"LoadingScreenController_LoadScene.NeverReplace(): {sceneName}, {playerStartTransform}, {playerEnterFSM}, {saveGame}, {fadeMask}, {unpauseGame}");
+            GameState.SetLoadingScreenStarted();
+        }
+    }
+
     [HarmonyPatch(typeof(LoadingScreenController), nameof(LoadingScreenController.LoadNextScene))]
     public class LoadingScreenController_LoadNextScene
     {

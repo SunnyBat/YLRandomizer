@@ -8,7 +8,9 @@ namespace YLRandomizer.GameAnalysis
         private static bool _inLoadingScreen = false;
         private static DateTime _lastLoadingScreenOuttroTime = DateTime.MinValue;
 
+        private static CameraManager _cameraManager;
         private static PlayerLogic _playerLogic;
+        private static HudSilhouetteController _hudSilhouetteController;
 
         /// <summary>
         /// Sets the loading screen state to finished. Important to call when loading screen finishes.
@@ -59,16 +61,26 @@ namespace YLRandomizer.GameAnalysis
         /// <returns></returns>
         public static bool HasFullControlOfCharacter()
         {
-            if (PauseController.instance.IsPaused)
+            if (!IsInGame() || PauseController.instance.IsPaused)
             {
                 return false;
             }
 
+            if (_cameraManager == null || !_cameraManager.isActiveAndEnabled)
+            {
+                _cameraManager = UnityEngine.Object.FindObjectOfType<CameraManager>();
+            }
             if (_playerLogic == null || !_playerLogic.isActiveAndEnabled)
             {
                 _playerLogic = UnityEngine.Object.FindObjectOfType<PlayerLogic>();
             }
-            return _playerLogic?.IsMovementEnabled() ?? false;
+            if (_hudSilhouetteController == null || !_hudSilhouetteController.isActiveAndEnabled)
+            {
+                _hudSilhouetteController = UnityEngine.Object.FindObjectOfType<HudSilhouetteController>();
+            }
+            return (_cameraManager?.IsPlayerCamera(_cameraManager?.GetCurrentCamera()) ?? false)
+                && (_playerLogic?.IsMovementEnabled() ?? false)
+                && (!_hudSilhouetteController?.IsAnimating() ?? true);
         }
     }
 }

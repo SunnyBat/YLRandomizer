@@ -54,7 +54,7 @@ namespace YLRandomizer.Data
                             var lookDir = (UnityEngine.Vector3)fcVar.GetValue(playerCam);
                             var angleTo = UnityEngine.Vector3.Angle(directionVector, lookDir);
                             var distanceFromPlayer = UnityEngine.Vector3.Distance(player.transform.position, closestPagie.gameObject.transform.position);
-                            closestPagieMessage = $"i={closestPagie.identifier} :: angle={angleTo} :: dist={distanceFromPlayer} :: name={closestPagie.name} :: HFCOC={GameState.HasFullControlOfCharacter()}";
+                            closestPagieMessage = $"i={closestPagie.identifier} :: angle={angleTo} :: dist={distanceFromPlayer} :: name={closestPagie.name}";
                         }
                         catch { } // Mostly for when camera is controlled by cutscene, since value we get by reflecting into it (I think that's where it dies...) is invalid
                     }
@@ -71,6 +71,7 @@ namespace YLRandomizer.Data
             var ret = new List<string>();
             ret.Add(closestPagieMessage);
             ret.Add($"Is in game: {GameState.IsInGame()}");
+            ret.Add($"HFCOC: {GameState.HasFullControlOfCharacter()}");
             ret.AddRange(_messages);
             return ret.ToArray();
 #else
