@@ -3,7 +3,6 @@ using YLRandomizer.Logging;
 
 namespace YLRandomizer.Patches
 {
-
     [HarmonyPatch(typeof(HudSilhouetteController), nameof(HudSilhouetteController.Animate))]
     public class HudSilhouetteController_Animate
     {
