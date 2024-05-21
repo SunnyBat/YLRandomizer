@@ -40,19 +40,7 @@ namespace YLRandomizer
                 }
                 catch (Exception e)
                 {
-                    while (e != null)
-                    {
-                        ManualSingleton<ILogger>.instance.Error(e.Message);
-                        ManualSingleton<ILogger>.instance.Error(e.StackTrace);
-                        if (e.InnerException != e)
-                        {
-                            e = e.InnerException;
-                        }
-                        else
-                        {
-                            e = null;
-                        }
-                    }
+                    Utilities.PrintFullErrorDetails(e);
                     ManualSingleton<ILogger>.instance.Critical("Error patching game. YLRandomizer will likely not work as expected, if at all.");
                 }
             }

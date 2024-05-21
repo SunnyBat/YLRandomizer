@@ -244,8 +244,7 @@ namespace YLRandomizer.Randomizer
                     }
                     catch (Exception e)
                     {
-                        ManualSingleton<ILogger>.instance.Error(e.Message);
-                        ManualSingleton<ILogger>.instance.Error(e.StackTrace);
+                        Utilities.PrintFullErrorDetails(e);
                     }
                 }
             }).Start();

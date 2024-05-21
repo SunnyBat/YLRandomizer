@@ -88,7 +88,7 @@ namespace YLRandomizer.GameAnalysis
             {
                 _hudSilhouetteController = UnityEngine.Object.FindObjectOfType<HudSilhouetteController>();
             }
-            return (_cameraManager?.IsPlayerCamera(_cameraManager?.GetCurrentCamera()) ?? false)
+            return (_cameraManager?.IsPlayerCamera(_cameraManager?.GetCurrentCamera()) ?? false || _cameraManager?.GetCurrentCamera()?.name == "IsometricCamera") // Icymetric Palace
                 && (_playerLogic?.IsMovementEnabled() ?? false)
                 && (!_hudSilhouetteController?.IsAnimating() ?? true);
         }

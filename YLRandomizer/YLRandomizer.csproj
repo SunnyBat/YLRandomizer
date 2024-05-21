@@ -104,6 +104,8 @@
     <Compile Include="GameAnalysis\GameState.cs" />
     <Compile Include="GameAnalysis\IntermediateActionTracker.cs" />
     <Compile Include="Logging\BepInExLogger.cs" />
+    <Compile Include="Patches\KillPlayerPatches.cs" />
+    <Compile Include="Patches\WarpColliderPatches.cs" />
     <Compile Include="Patches\AttackerPatches.cs" />
     <Compile Include="Patches\ConversationManagerPatches.cs" />
     <Compile Include="Patches\HudSilhouetteControllerPatches.cs" />

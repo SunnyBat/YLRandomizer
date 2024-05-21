@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using YLRandomizer.Logging;
 
@@ -32,6 +33,25 @@ namespace YLRandomizer
                 }
             }
             return false;
+        }
+
+        public static void PrintFullErrorDetails(Exception e)
+        {
+            int errorIteration = 0;
+            while (e != null && errorIteration < 100) // 100 is the max depth we should go, we're all but guaranteed to be infinitely looping at that point
+            {
+                ManualSingleton<ILogger>.instance.Error($"=== {errorIteration++} ===");
+                ManualSingleton<ILogger>.instance.Error(e.Message);
+                ManualSingleton<ILogger>.instance.Error(e.StackTrace);
+                if (e.InnerException != e)
+                {
+                    e = e.InnerException;
+                }
+                else
+                {
+                    e = null;
+                }
+            }
         }
     }
 }
