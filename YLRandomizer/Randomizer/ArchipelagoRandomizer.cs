@@ -381,7 +381,7 @@ namespace YLRandomizer.Randomizer
 
         public long[] GetCheckedAbilityLocations()
         {
-            return GetAllCheckedLocations().Where(locationId => locationId >= Constants.TROWSER_FREE_ABILITY_LOCATION_ID_START && locationId <= (Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START + 6)).ToArray();
+            return GetAllCheckedLocations().Where(locationId => locationId >= Constants.TROWSER_FREE_ABILITY_LOCATION_ID_START && locationId <= (Constants.TROWSER_PAID_ABILITY_LOCATION_ID_START + 8)).ToArray();
         }
 
         public void LocationChecked(params long[] locationIds)
