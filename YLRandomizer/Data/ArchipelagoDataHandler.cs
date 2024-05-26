@@ -29,7 +29,7 @@ namespace YLRandomizer.Data
                         if (playerInstance != null)
                         {
                             playerInstance.unspentPagies++;
-                            HudController.instance.UpdatePagieCounter(false);
+                            HudController.instance?.UpdatePagieCounter(false);
                         }
                     }
                     else if (itemId >= Constants.MOLLYCOOL_ITEM_ID_START && itemId <= Constants.MOLLYCOOL_ITEM_ID_START + 4)
