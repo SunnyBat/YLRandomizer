@@ -45,7 +45,7 @@ namespace YLRandomizer.Patches
     [HarmonyPatch(typeof(PlayerMoves), nameof(PlayerMoves.HasLearnedMove))]
     public class PlayerMoves_HasLearnedMove
     {
-        [HarmonyPostfix]
+        [HarmonyPrefix]
         public static bool SometimesReplace(PlayerMoves.Moves moveEnum, ref bool __result)
         {
             ManualSingleton<ILogger>.instance.Debug("PlayerMoves_HasLearnedMove: " + moveEnum);
@@ -68,7 +68,7 @@ namespace YLRandomizer.Patches
             }
             else
             {
-                ManualSingleton<ILogger>.instance.Debug("PlayerMoves_HasLearnedMove: NOT shop item 2: " + moveEnum);
+                ManualSingleton<ILogger>.instance.Debug("PlayerMoves_HasLearnedMove: NOT shop item: " + moveEnum);
                 Utilities.PrintStack();
                 return true;
             }

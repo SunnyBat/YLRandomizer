@@ -19,6 +19,9 @@ namespace YLRandomizer.Patches
             // things like the order in which you unlock moves. This would normally be fine, but it was
             // harder and more error-prone to do what this function originally did rather than just
             // doing it *normally*, like is implemented below. =/
+            var unityEngineNavigationClass = typeof(UnityEngine.UI.Navigation);
+            var unityEngineNavigationSelectOnUp = unityEngineNavigationClass.GetField("m_selectOnUp", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var unityEngineNavigationSelectOnDown = unityEngineNavigationClass.GetField("m_selectOnDown", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             var trowzaInterfaceClass = typeof(TrowzaInterface);
             var hasMoveBeenUnlockedFunction = trowzaInterfaceClass.GetMethod("HasMoveBeenUnlocked", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             trowzaInterfaceClass.GetMethod("MarkTrowzaAsFound", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).Invoke(__instance, new object[0]);
@@ -28,6 +31,11 @@ namespace YLRandomizer.Patches
             var m_nameConversationUtility = (ConversationGameUtility)trowzaInterfaceClass.GetField("m_nameConversationUtility", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(__instance);
             var m_bargainConversationUtility = (ConversationGameUtility)trowzaInterfaceClass.GetField("m_bargainConversationUtility", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(__instance);
             var m_firstSelectedField = trowzaInterfaceClass.GetField("m_firstSelected", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var enabledMovesItems = new List<TrowzaMoveItem>();
+            var enabledMovesInfo = new List<TrowzaMoveInfo>();
+            var disabledMovesItems = new List<TrowzaMoveItem>();
+            var disabledMovesInfo = new List<TrowzaMoveInfo>();
+            ManualSingleton<ILogger>.instance.Debug($"TrowzaInterface_ShowShopItems: {m_moveItems.Count}, {__instance.data.data.Length}");
             for (int i = 0; i < m_moveItems.Count; i++)
             {
                 TrowzaMoveItem trowzaMoveItem = m_moveItems[i];
@@ -35,7 +43,9 @@ namespace YLRandomizer.Patches
                 if ((bool) hasMoveBeenUnlockedFunction.Invoke(__instance, new object[] { trowzaMoveInfo }))
                 {
                     ManualSingleton<ILogger>.instance.Debug($"TrowzaInterface_ShowShopItems: {trowzaMoveInfo.move}");
-                    trowzaMoveItem.MoveIndex = i;
+                    trowzaMoveItem.MoveIndex = enabledMovesItems.Count;
+                    enabledMovesItems.Add(trowzaMoveItem);
+                    enabledMovesInfo.Add(trowzaMoveInfo);
                     trowzaMoveItem.SetName(m_nameConversationUtility.GetText(trowzaMoveInfo.nameIndex));
                     trowzaMoveItem.SetBargainText(m_bargainConversationUtility.GetText(trowzaMoveInfo.bargainIndex));
                     trowzaMoveItem.SetCost(trowzaMoveInfo.cost);
@@ -51,12 +61,68 @@ namespace YLRandomizer.Patches
                 else
                 {
                     ManualSingleton<ILogger>.instance.Debug($"TrowzaInterface_ShowShopItems: {trowzaMoveInfo.move}: Not available for sale");
-                    trowzaMoveItem.MoveIndex = i;
+                    trowzaMoveItem.MoveIndex = m_moveItems.Count - disabledMovesItems.Count;
+                    disabledMovesItems.Add(trowzaMoveItem);
+                    disabledMovesInfo.Add(trowzaMoveInfo);
                     trowzaMoveItem.IsAvailableForSale = false;
                 }
 
                 m_moveItems[i].SetAnimatorEnabled(isEnabled: true);
             }
+
+            // Need to wait until all enabled moves have been found, then set indeces
+            // based off of enabled move count
+            for (int i = 0; i < disabledMovesItems.Count; i++)
+            {
+                disabledMovesItems[i].MoveIndex = enabledMovesItems.Count + i;
+            }
+
+            // Set up navigation of each element -- the UI assumes every previous move is
+            // available, but this is not always the case. Without this, you can only access
+            // moves that are logically "next to" each other starting with the first available
+            // Trowzer move in the UI. For example, if you have Glacier, Marsh, and Galaxy
+            // moves unlocked, you can only access Glacier and Marsh moves, since the UI will
+            // not select the Galaxy move without the Cashino move unlocked.
+            if (enabledMovesItems.Count > 1)
+            {
+                for (int i = 0; i < enabledMovesItems.Count; i++)
+                {
+                    TrowzaMoveItem previousTrowzaMoveItem;
+                    if (i == 0)
+                    {
+                        previousTrowzaMoveItem = enabledMovesItems.Last();
+                    }
+                    else
+                    {
+                        previousTrowzaMoveItem = enabledMovesItems[i - 1];
+                    }
+                    TrowzaMoveItem currentTrowzaMoveItem = enabledMovesItems[i];
+                    TrowzaMoveItem nextTrowzaMoveItem;
+                    if (i == enabledMovesItems.Count - 1)
+                    {
+                        nextTrowzaMoveItem = enabledMovesItems.First();
+                    }
+                    else
+                    {
+                        nextTrowzaMoveItem = enabledMovesItems[i + 1];
+                    }
+                    var newNav = new UnityEngine.UI.Navigation();
+                    newNav.mode = UnityEngine.UI.Navigation.Mode.Explicit;
+                    newNav.selectOnUp = previousTrowzaMoveItem.ButtonControl;
+                    newNav.selectOnDown = nextTrowzaMoveItem.ButtonControl;
+                    currentTrowzaMoveItem.ButtonControl.navigation = newNav;
+                }
+            }
+
+            // Set move info to all the visible moves then all the not visible moves, in order
+            var combinedMovesInfo = new List<TrowzaMoveInfo>();
+            combinedMovesInfo.AddRange(enabledMovesInfo);
+            combinedMovesInfo.AddRange(disabledMovesInfo);
+            __instance.data.data = combinedMovesInfo.ToArray();
+            var combinedMoveItems = new List<TrowzaMoveItem>();
+            combinedMoveItems.AddRange(enabledMovesItems);
+            combinedMoveItems.AddRange(disabledMovesItems);
+            trowzaInterfaceClass.GetField("m_moveItems", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).SetValue(__instance, combinedMoveItems);
 
             return false;
         }
