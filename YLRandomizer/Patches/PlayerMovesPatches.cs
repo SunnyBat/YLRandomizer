@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using ParadoxNotion.Serialization.FullSerializer;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Networking.Types;
@@ -45,10 +46,32 @@ namespace YLRandomizer.Patches
     public class PlayerMoves_HasLearnedMove
     {
         [HarmonyPostfix]
-        public static void NeverReplace(PlayerMoves.Moves moveEnum)
+        public static bool SometimesReplace(PlayerMoves.Moves moveEnum, ref bool __result)
         {
             ManualSingleton<ILogger>.instance.Debug("PlayerMoves_HasLearnedMove: " + moveEnum);
-            Utilities.PrintStack();
+            // If we're in the Trowza interface, we want to check if we've sent the location
+            // Otherwise, we just let it run like normal.
+            if (Utilities.StackHasMethods("ShowShopItems", "ChooseMove"))
+            {
+                ManualSingleton<ILogger>.instance.Debug("PlayerMoves_HasLearnedMove: Shop item found: " + moveEnum);
+                var moveId = ItemAndLocationIdConverter.GetLocationIdFromMove(moveEnum);
+                __result = ManualSingleton<IRandomizer>.instance.GetCheckedAbilityLocations().Contains(moveId);
+                if (__result)
+                {
+                    IntermediateActionTracker.RemoveLocallyCheckedLocation(moveId);
+                }
+                else if (IntermediateActionTracker.HasLocationBeenCheckedLocally(moveId))
+                {
+                    __result = true;
+                }
+                return false;
+            }
+            else
+            {
+                ManualSingleton<ILogger>.instance.Debug("PlayerMoves_HasLearnedMove: NOT shop item 2: " + moveEnum);
+                Utilities.PrintStack();
+                return true;
+            }
         }
     }
 }

@@ -51,6 +51,7 @@ namespace YLRandomizer.Patches
                 else
                 {
                     ManualSingleton<ILogger>.instance.Debug($"TrowzaInterface_ShowShopItems: {trowzaMoveInfo.move}: Not available for sale");
+                    trowzaMoveItem.MoveIndex = i;
                     trowzaMoveItem.IsAvailableForSale = false;
                 }
 
