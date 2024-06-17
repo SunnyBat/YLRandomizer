@@ -19,9 +19,6 @@ namespace YLRandomizer.Patches
             // things like the order in which you unlock moves. This would normally be fine, but it was
             // harder and more error-prone to do what this function originally did rather than just
             // doing it *normally*, like is implemented below. =/
-            var unityEngineNavigationClass = typeof(UnityEngine.UI.Navigation);
-            var unityEngineNavigationSelectOnUp = unityEngineNavigationClass.GetField("m_selectOnUp", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-            var unityEngineNavigationSelectOnDown = unityEngineNavigationClass.GetField("m_selectOnDown", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             var trowzaInterfaceClass = typeof(TrowzaInterface);
             var hasMoveBeenUnlockedFunction = trowzaInterfaceClass.GetMethod("HasMoveBeenUnlocked", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             trowzaInterfaceClass.GetMethod("MarkTrowzaAsFound", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).Invoke(__instance, new object[0]);

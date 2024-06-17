@@ -3,6 +3,7 @@ using ParadoxNotion.Serialization.FullSerializer;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Networking.Types;
+using UnityEngine.SceneManagement;
 using YLRandomizer.Data;
 using YLRandomizer.GameAnalysis;
 using YLRandomizer.Logging;
@@ -48,12 +49,13 @@ namespace YLRandomizer.Patches
         [HarmonyPrefix]
         public static bool SometimesReplace(PlayerMoves.Moves moveEnum, ref bool __result)
         {
-            ManualSingleton<ILogger>.instance.Debug("PlayerMoves_HasLearnedMove: " + moveEnum);
+            //ManualSingleton<ILogger>.instance.Debug("PlayerMoves_HasLearnedMove: " + moveEnum);
             // If we're in the Trowza interface, we want to check if we've sent the location
             // Otherwise, we just let it run like normal.
-            if (Utilities.StackHasMethods("ShowShopItems", "ChooseMove"))
+            if (Utilities.StackHasMethods("ShowShopItems", "ChooseMove")
+                || Constants.ValidRemappingHubWorldSceneNames.Contains(SceneManager.GetActiveScene().name))
             {
-                ManualSingleton<ILogger>.instance.Debug("PlayerMoves_HasLearnedMove: Shop item found: " + moveEnum);
+                //ManualSingleton<ILogger>.instance.Debug("PlayerMoves_HasLearnedMove: Shop item found: " + moveEnum);
                 var moveId = ItemAndLocationIdConverter.GetLocationIdFromMove(moveEnum);
                 __result = ManualSingleton<IRandomizer>.instance.GetCheckedAbilityLocations().Contains(moveId);
                 if (__result)
@@ -68,8 +70,9 @@ namespace YLRandomizer.Patches
             }
             else
             {
-                ManualSingleton<ILogger>.instance.Debug("PlayerMoves_HasLearnedMove: NOT shop item: " + moveEnum);
-                Utilities.PrintStack();
+
+                //ManualSingleton<ILogger>.instance.Debug("PlayerMoves_HasLearnedMove: NOT shop item: " + moveEnum);
+                //Utilities.PrintStack();
                 return true;
             }
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using YLRandomizer.GameAnalysis;
@@ -272,7 +273,7 @@ namespace YLRandomizer.Data
                 }
                 catch (Exception e)
                 {
-                    ManualSingleton<ILogger>.instance.Error(e.Message);
+                    Utilities.PrintFullErrorDetails(e);
                     ManualSingleton<ILogger>.instance.Debug("Expected type: " + typeof(T));
                     ManualSingleton<ILogger>.instance.Debug("Actual type: " + outVal.GetType());
                 }

@@ -13,7 +13,7 @@ namespace YLRandomizer.Patches
     [HarmonyPatch(typeof(GameStatManager), nameof(GameStatManager.HasConditionBeenMet))]
     public class GameStatManager_HasConditionBeenMet
     {
-        private const int MAX_DYNAMIC_CALL_COUNT = 100;
+        private const int MAX_DYNAMIC_CALL_COUNT = 25;
 
         private static readonly Dictionary<EGameStats, int> _statCallCounts = new Dictionary<EGameStats, int>();
         private static readonly EGameStats[] _statsToNeverPrint = new EGameStats[]
@@ -63,11 +63,13 @@ namespace YLRandomizer.Patches
         [HarmonyPrefix]
         public static bool SometimesReplace(GameStatCondition condition, GameStatManager __instance, ref bool __result)
         {
-            // NOTES
-            // - Once you unlock Glacier, "JungleVisited, 1, GreaterOrEqualTo" gets rapidly evaluated.
-            //   No idea what this is for right now. Not sure if/when it stops.
             var callCount = _statCallCounts.GetValueSafe(condition.Stat);
-            if (condition.Stat == EGameStats.PagiesCollected && condition.Value == Constants.DEFAULT_REQUIRED_PAGIES_FOR_CAPITAL_B)
+            if (condition.Stat == EGameStats.JungleVisited && condition.Value == 1 && condition.ComparisonOperator == CompareMethod.GreaterOrEqualTo) // To activate plinth for Tribalstack expansion ASAP
+            {
+                __result = true;
+                return false;
+            }
+            else if (condition.Stat == EGameStats.PagiesCollected && condition.Value == Constants.DEFAULT_REQUIRED_PAGIES_FOR_CAPITAL_B)
             {
                 // Capital B lift elevator to office (final boss area) check
                 ManualSingleton<ILogger>.instance.Debug($"GameStatManager_HasConditionBeenMet.SometimesReplace(): {condition.Stat}, {condition.Value}, {condition.ComparisonOperator})");
@@ -130,7 +132,23 @@ namespace YLRandomizer.Patches
                     hasBeenChecked = true;
                 }
                 var hasCollectedPagie = true;
-                if (__instance.GameStats.TryGetValue(condition.Stat, out int originalValue))
+                if (ArchipelagoDataHandler.TryGetSlotData(Constants.CONFIGURATION_NAME_WORLDORDER, out Newtonsoft.Json.Linq.JArray worldOrderFromServer) && worldOrderFromServer.Count == 5)
+                {
+                    var randomizedWorldOrder = worldOrderFromServer.ToArray();
+                    var newWorldOptionsId = randomizedWorldOrder[(int) condition.Stat - 18].ToString();
+                    var newLogicalIndexFromRandomizedWorldOrder = Array.IndexOf(Constants.VanillaConfigurationOptionsWorldOrder, newWorldOptionsId);
+                    if (newLogicalIndexFromRandomizedWorldOrder != -1)
+                    {
+                        var savegameManagerWorldIndex = Constants.WorldIndexOrder[newLogicalIndexFromRandomizedWorldOrder];
+                        var worldData = SavegameManager.instance.savegame.worlds[savegameManagerWorldIndex];
+                        hasCollectedPagie = OperationTools.Compare(worldData.pagieCount, condition.Value, condition.ComparisonOperator);
+                    }
+                    else
+                    {
+                        hasCollectedPagie = false;
+                    }
+                }
+                else if (__instance.GameStats.TryGetValue(condition.Stat, out int originalValue))
                 {
                     hasCollectedPagie = OperationTools.Compare(originalValue, condition.Value, condition.ComparisonOperator);
                 }
@@ -210,5 +228,47 @@ namespace YLRandomizer.Patches
             ManualSingleton<ILogger>.instance.Debug($"GameStatManager_IsStatGreaterThanZero.SometimesReplace(): {stat}");
             return true;
         }
-    }
+    }//SetGameStat(EGameStats stat, int newValue)
+
+    //[HarmonyPatch(typeof(GameStatManager), nameof(GameStatManager.SetGameStat), new Type[] { typeof(EGameStats), typeof(int) })]
+    //public class GameStatManager_SetGameStat
+    //{
+    //    [HarmonyPrefix]
+    //    public static void ModifyParameters(EGameStats stat, ref int newValue)
+    //    {
+    //        ManualSingleton<ILogger>.instance.Debug($"GameStatManager_SetGameStat.ModifyParameters(): {stat}, {newValue}");
+    //        if (stat == EGameStats.CurrentLoadStartPoint && ArchipelagoDataHandler.TryGetSlotData(Constants.CONFIGURATION_NAME_WORLDORDER, out Newtonsoft.Json.Linq.JArray worldOrder))
+    //        {
+    //            // 9-13 = TT-GY, 14-18 = Expanded, vanilla world order
+    //            if (newValue >= 9 && newValue <= 18)
+    //            {
+    //                var vanillaWorldIndex = (newValue - 9) % 5;
+    //                var worldOptionsId = worldOrder[vanillaWorldIndex];
+    //                var newerValue = Array.IndexOf(Constants.VanillaConfigurationOptionsWorldOrder, worldOptionsId) + 9;
+    //                if (newValue >= 14) // Expanded world
+    //                {
+    //                    newerValue += 5;
+    //                }
+    //                newValue = newerValue;
+    //                //switch (newValue)
+    //                //{
+    //                //    case 9: // Tribalstack Tropics
+    //                //    case 14: // Tribalstack Tropics Expanded
+    //                //    case 10: // Glitterglaze Glacier
+    //                //    case 15: // Glitterglaze Glacier Expanded
+    //                //    case 11: // Moodymaze Marsh
+    //                //    case 16: // Moodymaze Marsh Expanded
+    //                //    case 12: // Capital Cashino
+    //                //    case 17: // Capital Cashino Expanded
+    //                //    case 13: // Galleon Galaxy
+    //                //    case 18: // Galleon Galaxy Expanded
+    //                //}
+    //            }
+    //            else if (newValue >= 4 && newValue <= 8)
+    //            {
+
+    //            }
+    //        }
+    //    }
+    //}
 }

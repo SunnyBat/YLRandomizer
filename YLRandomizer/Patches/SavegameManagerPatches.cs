@@ -1,4 +1,9 @@
 ﻿using HarmonyLib;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine.SceneManagement;
 using YLRandomizer.Data;
 using YLRandomizer.GameAnalysis;
 using YLRandomizer.Logging;
@@ -17,19 +22,6 @@ namespace YLRandomizer.Patches
             ManualSingleton<IRandomizer>.instance?.LocationChecked(ArchipelagoLocationConverter.GetPagieLocationId(DestroyableMonoBehaviourSingleton<WorldInfo>.instance.worldIndex, index));
         }
     }
-
-    // Not overriding right now since the main use case for this is PauseTotalsScreenController, which we're patching already
-    //[HarmonyPatch(typeof(SavegameManager), nameof(SavegameManager.GetAllPagieCount))]
-    //public class SavegameManager_GetAllPagieCount
-    //{
-    //    [HarmonyPrefix]
-    //    public static bool AlwaysReplace(ref int __result)
-    //    {
-    //        ManualSingleton<ILogger>.instance.Debug($"SavegameManager_GetAllPagieCount.AlwaysReplace()");
-    //        __result = ManualSingleton<IRandomizer>.instance?.GetReceivedPagiesCount() ?? 0;
-    //        return false;
-    //    }
-    //}
 
     [HarmonyPatch(typeof(SavegameManager), nameof(SavegameManager.CollectArcadeToken))]
     public class SavegameManager_CollectArcadeToken

@@ -1,4 +1,7 @@
-﻿namespace YLRandomizer.Data
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace YLRandomizer.Data
 {
     public class Constants
     {
@@ -23,8 +26,31 @@
         public const long PLAYCOIN_ITEM_ID_START = ID_BASE + 20; // 5 total
         public const long ABILITY_ITEM_ID_START = ID_BASE + 50;
         public const string CONFIGURATION_NAME_CAPITAL_B_PAGIE_COUNT = "CapitalBPagieCount";
+        public const string CONFIGURATION_NAME_WORLDORDER = "WorldOrder";
         public const string CONFIGURATION_NAME_DISABLE_QUIZZES = "DisableQuizzes";
         public const string CONFIGURATION_NAME_DEATHLINK = "DeathLink";
+
+        // CC, GY, TT, GG, MM
+        // TT -> "Level_04_Casino"
+        // "Level_04_Casino" -> TT
+        public static readonly string[] VanillaConfigurationOptionsWorldOrder = new string[] { "TT", "GG", "MM", "CC", "GY" };
+        public static readonly string[][] VanillaSceneNameWorldOrder = new string[][] {
+            new string[] { "Level_01_Jungle", "Level_01_Jungle_Expanded" },
+            new string[] { "Level_02_Glacier", "Level_02_Glacier_Expanded" },
+            new string[] { "Level_03_Swamp", "Level_03_Swamp_Expanded" },
+            new string[] { "Level_04_Casino", "Level_04_Casino_Expanded" },
+            new string[] { "Level_05_Space", "Level_05_Space_Expanded" }
+        };
+        // "Frontend_Menu" // Main Menu scene name
+        public static readonly string[][] HubWorldAndPlayerStartTransformNames = new string[][]
+        {
+            new string[] { "Level_00_Hub_A", "JungleReturn" }, // Tribalstack Tropics
+            new string[] { "Level_00_Hub_A", "GlacierReturn" }, // Glitterglaze Glacier
+            new string[] { "Level_00_Hub_B", "SwampReturn" }, // Moodymaze Marsh
+            new string[] { "Level_00_Hub_C", "CasinoReturn" }, // Capital Cashino
+            new string[] { "Level_00_Hub_C", "SpaceReturn" }  // Galleon Galaxy
+        };
+        public static readonly string[] ValidRemappingHubWorldSceneNames = HubWorldAndPlayerStartTransformNames.Select(arr => arr[0]).Distinct().ToArray();
 
         /// <summary>
         /// The order in which book world indeces (eg excluding Hivory Towers) are ordered in SavegameManager.instance.savegame.worlds.

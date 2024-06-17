@@ -14,6 +14,7 @@ namespace YLRandomizer.Patches
         private const string QUAD_CAPITAL_B_FORMATTABLE = "{0}/{1}/{2} ({3})";
         private const string TRIPLE_TOTAL_LABELLED = "RCV/SND/T";
         private const string TRIPLE_TOTAL_FORMATTABLE = "{0}/{1}/{2}";
+
         [HarmonyPostfix]
         public static IEnumerator Postfix(IEnumerator result, PauseTotalsScreenController __instance)
         {
