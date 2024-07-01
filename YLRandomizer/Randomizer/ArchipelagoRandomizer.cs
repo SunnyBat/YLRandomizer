@@ -13,20 +13,6 @@ using YLRandomizer.Logging;
 
 namespace YLRandomizer.Randomizer
 {
-    // TODO Make Archipelago use slot indeces 3+
-    // This will:
-    // - Not overwrite users' current saves
-    // - Allow an infinite amount of slots
-    // - Auto-recall saves so users don't accidentally use the wrong one
-    // Use _session.RoomState.Seed to distinguish between seeds. Use a file to map
-    // the seed to the slot number. Always increment the slot number up.
-    // Slot number has some hardcoded values (probably just the SavegameManager save
-    // array), we'll need to overwrite this ASAP so it supports an arbitrarily large
-    // amount of saves (probably go with 10k or something). Have a backup in case we
-    // hit this number that prints a message letting the user know the need to clean
-    // up their AP saves.
-    // Looks like there's some additional logic that would need to be patched, maybe
-    // for another time :(
     public class ArchipelagoRandomizer : IRandomizer
     {
         public event ItemReceivedCallback ItemReceived;
@@ -59,7 +45,7 @@ namespace YLRandomizer.Randomizer
         private DeathLinkService _deathLink;
         private ArchipelagoClientState _currentGameState = ArchipelagoClientState.ClientUnknown;
         private ArchipelagoClientState _lastSentGameState = ArchipelagoClientState.ClientUnknown;
-        private readonly Queue<NetworkItem> _itemReceivedQueue = new Queue<NetworkItem>();
+        private readonly Queue<ItemInfo> _itemReceivedQueue = new Queue<ItemInfo>();
         private readonly Queue<long> _locationReceivedQueue = new Queue<long>();
         private readonly Queue<string> _messageReceivedQueue = new Queue<string>();
         private readonly Queue<long> _locationSendQueue = new Queue<long>();
@@ -284,7 +270,9 @@ namespace YLRandomizer.Randomizer
                     // - _session is never changed
                     // - Items is never changed
                     // - AllItemsReceived is thread-safe
-                    return _session.Items.AllItemsReceived.Select(itm => itm.Item).ToArray();
+                    // Also don't need to pass Game because all of these items
+                    // are only going to be for this Game
+                    return _session.Items.AllItemsReceived.Select(itm => itm.ItemId).ToArray();
                 }
                 else
                 {
@@ -479,7 +467,7 @@ namespace YLRandomizer.Randomizer
             if (ItemReceived != null)
             {
                 // Process items
-                NetworkItem[] items;
+                ItemInfo[] items;
                 lock (_threadLock)
                 {
                     items = _itemReceivedQueue.ToArray();
@@ -488,15 +476,15 @@ namespace YLRandomizer.Randomizer
                 items.Do(item => {
                     try
                     {
-                        ItemReceived(item.Item);
+                        ItemReceived(item.ItemId);
                     }
                     catch (Exception e)
                     {
                         lock (_threadLock)
                         {
-                            _messageReceivedQueue.Enqueue($"ERROR: Exception while processing item unlock ({item.Item}, {item.Location}, {item.Player}): {e.Message}");
+                            _messageReceivedQueue.Enqueue($"ERROR: Exception while processing item unlock ({item.ItemName} ({item.ItemId}), {item.ItemGame}, {item.LocationName} ({item.LocationId}), {item.Player}): {e.Message}");
                         }
-                        ManualSingleton<ILogger>.instance.Error($"Exception while processing item unlock ({item.Item}, {item.Location}, {item.Player}): {e.Message}");
+                        ManualSingleton<ILogger>.instance.Error($"Exception while processing item unlock ({item.ItemName} ({item.ItemId}), {item.ItemGame}, {item.LocationName} ({item.LocationId}), {item.Player}): {e.Message}");
                         ManualSingleton<ILogger>.instance.Error(e.StackTrace);
                     }
                 });
