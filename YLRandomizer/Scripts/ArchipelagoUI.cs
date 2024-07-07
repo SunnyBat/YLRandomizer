@@ -28,23 +28,22 @@ namespace YLRandomizer.Scripts
             labelFontStyle.normal.textColor = Color.white;
             var calculatedRectWidth = (int)Math.Round(BACKGROUND_RECT_BASE_WIDTH * ((double)_fontSize / DEFAULT_TEXT_SIZE));
             var calculatedHeightForEachElement = _fontSize + SPACE_BETWEEN_GUI_ROWS;
-            _drawShadedRectangle(new Rect(BACKGROUND_RECT_X_COORD, BACKGROUND_RECT_Y_COORD, calculatedRectWidth, BACKGROUND_RECT_PADDING * 2 + calculatedHeightForEachElement));
             var currentXCoordinate = BACKGROUND_RECT_X_COORD + BACKGROUND_RECT_PADDING;
             var currentYCoordinate = BACKGROUND_RECT_Y_COORD + BACKGROUND_RECT_PADDING;
             var inputFieldXCoordinateOffset = calculatedRectWidth / 2;
-            GUI.Label(new Rect(currentXCoordinate, currentYCoordinate, inputFieldXCoordinateOffset, calculatedHeightForEachElement), "YLRandomizer font size: ", labelFontStyle);
-            if (GUI.Button(new Rect(currentXCoordinate + inputFieldXCoordinateOffset, currentYCoordinate, _fontSize * 2, calculatedHeightForEachElement), "-", buttonFontStyle))
-            {
-                _fontSize--;
-            }
-            if (GUI.Button(new Rect(currentXCoordinate + inputFieldXCoordinateOffset + (_fontSize * 2) + SPACE_BETWEEN_GUI_ELEMENTS_IN_ROW, currentYCoordinate, _fontSize * 2, calculatedHeightForEachElement), "+", buttonFontStyle))
-            {
-                _fontSize++;
-            }
-            currentYCoordinate += calculatedHeightForEachElement;
             if (ManualSingleton<IRandomizer>.instance == null || !ManualSingleton<IRandomizer>.instance.IsConfigured())
             {
-                _drawShadedRectangle(new Rect(BACKGROUND_RECT_X_COORD, currentYCoordinate + BACKGROUND_RECT_PADDING, calculatedRectWidth, BACKGROUND_RECT_PADDING + calculatedHeightForEachElement * 4));
+                _drawShadedRectangle(new Rect(BACKGROUND_RECT_X_COORD, currentYCoordinate - BACKGROUND_RECT_PADDING, calculatedRectWidth, (BACKGROUND_RECT_PADDING * 2) + calculatedHeightForEachElement * 5));
+                GUI.Label(new Rect(currentXCoordinate, currentYCoordinate, inputFieldXCoordinateOffset, calculatedHeightForEachElement), "YLRandomizer font size: ", labelFontStyle);
+                if (GUI.Button(new Rect(currentXCoordinate + inputFieldXCoordinateOffset, currentYCoordinate, _fontSize * 2, calculatedHeightForEachElement), "-", buttonFontStyle))
+                {
+                    _fontSize--;
+                }
+                if (GUI.Button(new Rect(currentXCoordinate + inputFieldXCoordinateOffset + (_fontSize * 2) + SPACE_BETWEEN_GUI_ELEMENTS_IN_ROW, currentYCoordinate, _fontSize * 2, calculatedHeightForEachElement), "+", buttonFontStyle))
+                {
+                    _fontSize++;
+                }
+                currentYCoordinate += calculatedHeightForEachElement;
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
                 // Yoinked directly from Subnautica randomizer, thanks Berserker
@@ -64,7 +63,6 @@ namespace YLRandomizer.Scripts
                 if (submit && Event.current.type == EventType.KeyDown)
                 {
                     // The text fields have not consumed the event, which means they were not focused.
-                    Console.WriteLine("NO SUBMIT FOR YOU");
                     submit = false;
                 }
                 if ((GUI.Button(new Rect(currentXCoordinate, currentYCoordinate, 76 + (_fontSize * 2), calculatedHeightForEachElement), "Connect", buttonFontStyle) || submit) && !string.IsNullOrEmpty(_hostName) && !string.IsNullOrEmpty(_username))
@@ -73,14 +71,14 @@ namespace YLRandomizer.Scripts
                     ArchipelagoDataHandler.HookUpEventSubscribers();
                 }
                 currentYCoordinate += calculatedHeightForEachElement;
-                _printMessages(currentYCoordinate + BACKGROUND_RECT_PADDING * 2, calculatedRectWidth, calculatedHeightForEachElement, labelFontStyle);
+                _printMessages(currentYCoordinate + BACKGROUND_RECT_PADDING, calculatedRectWidth, calculatedHeightForEachElement, labelFontStyle);
             }
             else
             {
-                _drawShadedRectangle(new Rect(BACKGROUND_RECT_X_COORD, currentYCoordinate + BACKGROUND_RECT_PADDING, calculatedRectWidth, BACKGROUND_RECT_PADDING + calculatedHeightForEachElement));
+                _drawShadedRectangle(new Rect(BACKGROUND_RECT_X_COORD, currentYCoordinate - BACKGROUND_RECT_PADDING, calculatedRectWidth, (BACKGROUND_RECT_PADDING * 2) + calculatedHeightForEachElement));
                 GUI.Label(new Rect(currentXCoordinate, currentYCoordinate, 900, calculatedHeightForEachElement), "Archipelago configured.", labelFontStyle);
                 currentYCoordinate += calculatedHeightForEachElement;
-                _printMessages(currentYCoordinate + BACKGROUND_RECT_PADDING * 2, calculatedRectWidth, calculatedHeightForEachElement, labelFontStyle);
+                _printMessages(currentYCoordinate + BACKGROUND_RECT_PADDING, calculatedRectWidth, calculatedHeightForEachElement, labelFontStyle);
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
             }
